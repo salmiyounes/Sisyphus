@@ -1,3 +1,12 @@
+<div align="center">
+
+# Sisyphus
+
+![Lichess bullet ranking](https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=bullet)
+![Lichess blitz ranking](https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=blitz)
+![Lichess rapid ranking](https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=rapid)
+</div>
+
 Introduction
 ------------
 
