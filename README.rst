@@ -1,11 +1,18 @@
-<div align="center">
+========
+Sisyphus
+========
 
-# Sisyphus
+.. image:: https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=bullet
+   :alt: Lichess bullet ranking
+   :target: https://lichess.org
 
-![Lichess bullet ranking](https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=bullet)
-![Lichess blitz ranking](https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=blitz)
-![Lichess rapid ranking](https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=rapid)
-</div>
+.. image:: https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=blitz
+   :alt: Lichess blitz ranking
+   :target: https://lichess.org
+
+.. image:: https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=rapid
+   :alt: Lichess rapid ranking
+   :target: https://lichess.org
 
 Introduction
 ------------
