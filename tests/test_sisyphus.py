@@ -163,7 +163,7 @@ class BoardTestCase(unittest.TestCase):
 
         board = sisyphus.Board()
 
-        max_test_depth = 3
+        max_test_depth = 7
         for fen, expected_results in test_positions.items():
             board.set_fen(fen)
 
