@@ -386,7 +386,7 @@ void board_to_fen(ChessBoard *board, char *fen) {
     sq = !!board->ep ? get_lsb(board->ep) : -1;
     sq_to_string(sq, str);
 
-    sprintf(fen, " %s", str);
+    snprintf(fen, 4, " %s", str);
 }
 
 bb perft_test(ChessBoard *board, int depth) {
