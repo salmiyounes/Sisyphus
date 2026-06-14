@@ -51,6 +51,14 @@ int rank_of(int sq);
 // Converts rank and file to square index
 int square(int rank, int file);
 
+bb bb_get_bishop_attacks(int sq, bb obs);
+
+bb bb_get_rook_attacks(int sq, bb obs);
+
+int bb_attacks_to_king_square(ChessBoard *board, bb b_king);
+
+bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ);
+
 // Creates piece type combining piece and color
 int make_piece_type(int pc, int color);
 

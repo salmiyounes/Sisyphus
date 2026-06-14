@@ -133,6 +133,61 @@ int bb_squares(bb value, int squares[64]) {
     return i;
 }
 
+INLINE bb bb_get_pawns_attacks(int sq, int color) {
+    assert(sq >= 0 && sq < SQUARE_NB);
+    assert(color == WHITE || color == BLACK);
+    return BB_PAWNS[color][sq];
+}
+
+INLINE bb bb_get_bishop_attacks(int sq, bb obs) {
+    assert(sq >= 0 && sq < SQUARE_NB);
+    return bb_bishop(sq, obs);
+}
+
+INLINE bb bb_get_knight_attacks(int sq) {
+    assert(sq >= 0 && sq < SQUARE_NB);
+    return BB_KNIGHT[sq];
+}
+
+INLINE bb bb_get_rook_attacks(int sq, bb obs) {
+    assert(sq >= 0 && sq < SQUARE_NB);
+    return bb_rook(sq, obs);
+}
+
+INLINE bb bb_get_queen_attacks(int sq, bb obs) {
+    assert(sq >= 0 && sq < SQUARE_NB);
+    return bb_queen(sq, obs);
+}
+
+INLINE bb bb_get_king_attacks(int sq) {
+    assert(sq >= 0 && sq < SQUARE_NB);
+    return BB_KING[sq];
+}
+
+int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
+    assert(b_king);
+    return (bb_attacks_to_square(board, get_lsb(b_king), board->occ[BOTH]) &
+            board->occ[board->color])
+           ? 1
+           : 0;
+}
+
+bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ) {
+    bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
+    bb bishops = board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];
+    bb rooks = board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK];
+    bb knights  = board->bb_squares[WHITE_KNIGHT] | board->bb_squares[BLACK_KNIGHT];
+    bb kings    = board->bb_squares[WHITE_KING]   | board->bb_squares[BLACK_KING];
+
+    return (bb_get_pawns_attacks(sq, WHITE) & board->bb_squares[BLACK_PAWN]) |
+           (bb_get_pawns_attacks(sq, BLACK) & board->bb_squares[WHITE_PAWN]) |
+           (bb_get_knight_attacks(sq)       & knights) |
+           (bb_get_bishop_attacks(sq, occ)  & bishops) | 
+           (bb_get_rook_attacks(sq, occ)    & rooks)   | 
+           (bb_get_queen_attacks(sq, occ) & queens) |
+           (bb_get_king_attacks(sq)         & kings);
+}
+
 bb bb_pawns_attacks(int sq, int color) {
     assert(sq >= 0 && sq < SQUARE_NB);
     const bb board = BIT(sq);
