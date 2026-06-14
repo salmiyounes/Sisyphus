@@ -10,9 +10,9 @@
 #include <string.h>
 
 // Node types in transposition table
-#define EXACT 1  // Exact evaluation score
-#define ALPHA 2  // Upper bound score
-#define BETA 3   // Lower bound score
+#define EXACT 1 // Exact evaluation score
+#define ALPHA 2 // Upper bound score
+#define BETA 3  // Lower bound score
 
 // Function declarations for table operations
 // Prefetch table entry for given position key

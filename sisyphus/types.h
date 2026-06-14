@@ -8,42 +8,45 @@
 
 // Debug print macro
 #if !defined(DEBUG_DISABLE_PRINT) || defined(DEBUG)
-    #define err(str) \
-        fprintf(stderr, "%s, at %s, line %d\n", str, __FILE__, __LINE__); \
-        fflush(stderr)
+#define err(str)                                                               \
+  fprintf(stderr, "%s, at %s, line %d\n", str, __FILE__, __LINE__);            \
+  fflush(stderr)
 #else
-    #define err(str)
+#define err(str)
 #endif
 
 // Assertion macro
 #if !defined(DISABLE_ASSERT)
-    #define ASSERT(expr) assert(expr)
+#define ASSERT(expr) assert(expr)
 #else
-    #define ASSERT(expr) ((void)0)
+#define ASSERT(expr) ((void)0)
 #endif
 
-typedef unsigned long long bb; // Bitboard type definition (64-bit unsigned integer)
+#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(*(arr)))
+
+typedef unsigned long long
+    bb; // Bitboard type definition (64-bit unsigned integer)
 
 #define U64(u) u##ULL
 #define U32(u) u##U
 
 typedef struct {
-    int squares[64]; // Piece placement array
-    int numMoves;    // Number of moves played 
-    int color;       // Current side to move
-    int castle;      // Castling rights
+  int squares[64]; // Piece placement array
+  int numMoves;    // Number of moves played
+  int color;       // Current side to move
+  int castle;      // Castling rights
 
-    int mg[2];       // Middlegame evaluation score for both sides
-    int eg[2];       // Endgame evaluation score for both sides
-    int gamePhase;   // Current game phase (opening/middlegame/endgame)
+  int mg[2];     // Middlegame evaluation score for both sides
+  int eg[2];     // Endgame evaluation score for both sides
+  int gamePhase; // Current game phase (opening/middlegame/endgame)
 
-    bb bb_squares[12];  // Bitboards for each piece type and color
-    bb m_history[8192]; // Move history for repetition detection
-    bb occ[3];          // Occupancy bitboards (white/black/both)
+  bb bb_squares[12];  // Bitboards for each piece type and color
+  bb m_history[8192]; // Move history for repetition detection
+  bb occ[3];          // Occupancy bitboards (white/black/both)
 
-    bb ep;           // En passant square bitboard
-    bb hash;         // Position hash
-    bb pawn_hash;    // Pawn structure hash (not used)
+  bb ep;        // En passant square bitboard
+  bb hash;      // Position hash
+  bb pawn_hash; // Pawn structure hash (not used)
 } ChessBoard;
 
 typedef uint32_t Move; // Move type (32-bit unsigned integer)
@@ -52,55 +55,55 @@ typedef int (*MoveGen)(ChessBoard *, Move *);
 typedef int (*AttacksGen)(ChessBoard *, Move *, bb);
 
 typedef struct {
-    int capture; // Captured piece 
-    int castle; // Previous castling rights
-    bb ep;      // Previous en passant square
+  int capture; // Captured piece
+  int castle;  // Previous castling rights
+  bb ep;       // Previous en passant square
 } Undo;
 
 typedef struct {
-    bb key;             // Position hash
-    int score;          // Evaluation score
-    int depth;          // Search depth
-    int flag;           // Entry type flag
-    Move move;          // Best move
+  bb key;    // Position hash
+  int score; // Evaluation score
+  int depth; // Search depth
+  int flag;  // Entry type flag
+  Move move; // Best move
 } Entry;
 
 typedef struct {
-    int size;           // Table size
-    int mask;           // Size mask for indexing
-    Entry *entry;       // Array of entries
+  int size;     // Table size
+  int mask;     // Size mask for indexing
+  Entry *entry; // Array of entries
 } Table;
 
 typedef struct {
-    bb key;             // Pawn structure hash
-    int value;          // Evaluation score
+  bb key;    // Pawn structure hash
+  int value; // Evaluation score
 } PawnEntry;
 
 typedef struct {
-    int size;           // Table size
-    int mask;           // Size mask for indexing
-    PawnEntry *entry;   // Array of entries
+  int size;         // Table size
+  int mask;         // Size mask for indexing
+  PawnEntry *entry; // Array of entries
 } PawnTable;
 
 typedef struct {
-    int nodes;          // Nodes searched
-    bool stop;          // Search stop flag
-    Move move;          // Best move found
-    Table table;        // Transposition table
+  int nodes;   // Nodes searched
+  bool stop;   // Search stop flag
+  Move move;   // Best move found
+  Table table; // Transposition table
 } Search;
 
 typedef struct {
-    int score;          // Evaluation score
-    bool debug;         // Debug flag
-    Search *search;     // Search information
-    ChessBoard *board;  // Board state
-    Move *move;         // Move to be played
+  int score;         // Evaluation score
+  bool debug;        // Debug flag
+  Search *search;    // Search information
+  ChessBoard *board; // Board state
+  Move *move;        // Move to be played
 } Thread_d;
 
 typedef struct {
-    bb key;             // Position hash
-    bb value;           // Stored value
-    int depth;          // Search depth
+  bb key;    // Position hash
+  bb value;  // Stored value
+  int depth; // Search depth
 } Entry_t;
 
 #define SQUARE_NB 64

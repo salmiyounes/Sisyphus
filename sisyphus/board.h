@@ -49,29 +49,32 @@ extern const int *square_values[13];
 extern int piece_material[13];
 extern int castling_rights[64];
 
- /* Macros */
-#define MAX(x, y) (x ^ ((x ^ y) & -(x < y)))     // Get maximum of two values
-#define MIN(x, y) (y ^ ((x ^ y) & -(x < y)))     // Get minimum of two values
-#define FLIP(sq) ((sq ^ 56))                      // Flip square vertically
-#define FLIP_63(sq) ((sq ^ 63))                   // Flip square diagonally
-#define PIECE(x) (((x) & ~1) >> 1)               // Get piece type from piece code
-#define COLOR(x) ((x) & 1)                        // Get piece color
-#define SWITCH_SIDE(x) (x->color ^= BLACK)        // Switch side to move
+/* Macros */
+#define MAX(x, y) (x ^ ((x ^ y) & -(x < y))) // Get maximum of two values
+#define MIN(x, y) (y ^ ((x ^ y) & -(x < y))) // Get minimum of two values
+#define FLIP(sq) ((sq ^ 56))                 // Flip square vertically
+#define FLIP_63(sq) ((sq ^ 63))              // Flip square diagonally
+#define PIECE(x) (((x) & ~1) >> 1)           // Get piece type from piece code
+#define COLOR(x) ((x) & 1)                   // Get piece color
+#define SWITCH_SIDE(x) (x->color ^= BLACK)   // Switch side to move
 
 // Board manipulation functions
-void board_init(ChessBoard *b);                   // Initialize chess board
-void print_board(ChessBoard *b);                  // Print board representation
-void board_load_fen(ChessBoard *board, const char *fen);  // Load position from FEN
-void board_to_fen(ChessBoard *board, char *fen);  // Convert position to FEN
-void board_update(ChessBoard *board, int sq, int piece);  // Update board state
+void board_init(ChessBoard *b);  // Initialize chess board
+void print_board(ChessBoard *b); // Print board representation
+void board_load_fen(ChessBoard *board,
+                    const char *fen);            // Load position from FEN
+void board_to_fen(ChessBoard *board, char *fen); // Convert position to FEN
+void board_update(ChessBoard *board, int sq, int piece); // Update board state
 
 // Game state evaluation
-int board_drawn_by_insufficient_material(ChessBoard *board);  // Check material draw
-int is_draw(ChessBoard *board, int ply);          // Check if position is drawn
+int board_drawn_by_insufficient_material(
+    ChessBoard *board);                  // Check material draw
+int is_draw(ChessBoard *board, int ply); // Check if position is drawn
 
 // Testing and threading
-bb perft_test(ChessBoard *board, int depth);      // Performance test
-void thread_init(Search *search, ChessBoard *board, Move *result, float duration, bool debug);  // Initialize search thread
-void thread_stop(Search *search);                 // Stop search thread
+bb perft_test(ChessBoard *board, int depth); // Performance test
+void thread_init(Search *search, ChessBoard *board, Move *result,
+                 float duration, bool debug); // Initialize search thread
+void thread_stop(Search *search);             // Stop search thread
 
 #endif // BOARD_H

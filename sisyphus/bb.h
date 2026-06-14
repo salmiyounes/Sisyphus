@@ -4,7 +4,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-  /* Macros */
+/* Macros */
 #define BIT(sq) (U64(1) << (sq))
 
 #define POP_LSB(b, x)                                                          \

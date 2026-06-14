@@ -19,7 +19,7 @@ __author__ = "Salmi Younes"
 
 __version__ = "0.1.0"
 
-__license__ = "MIT" 
+__license__ = "MIT"
 
 import os
 import dataclasses
@@ -55,6 +55,7 @@ from ctypes import (
 # Starting possition fen
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
 
+_bb_initialized = False
 
 BitBoard: TypeAlias = int
 
@@ -173,6 +174,7 @@ PIECE_SYMBOLS: List[str] = ["p", "n", "b", "r", "q", "k"]
 
 class ChessBoard(Structure):
     """A C structure that represents a chess position using bitboards for piece placement, game state, and move history."""
+
     _fields_ = [
         ("squares", c_int * SQUARE_NB),
         ("numMoves", c_int),
@@ -192,6 +194,7 @@ class ChessBoard(Structure):
 
 class Entry(Structure):
     """A C structure that represents a transposition table entry storing position evaluations and best moves."""
+
     _fields_ = [
         ("key", c_uint64),
         ("score", c_int),
@@ -202,16 +205,19 @@ class Entry(Structure):
 
 class Table(Structure):
     """A C structure representing a transposition table with size, mask and array of position entries."""
+
     _fields_ = [("size", c_int), ("mask", c_int), ("entry", POINTER(Entry))]
 
 
 class Search(Structure):
     """A C structure that manages chess engine search state including node count, stop flag, and transposition table."""
+
     _fields_ = [("nodes", c_int), ("stop", c_bool), ("num", c_int), ("table", Table)]
 
 
 class Undo(Structure):
     """A C structure that stores information needed to undo a chess move, including captured pieces, castling rights, and en passant state."""
+
     _fields_ = [("capture", c_int), ("castle", c_int), ("ep", c_uint64)]
 
 
@@ -242,10 +248,10 @@ chess_lib.bb_init.argtypes = []
 chess_lib.bb_init.restype = c_void_p
 chess_lib.bb_print.argtypes = [c_uint64]
 chess_lib.bb_print.restype = c_void_p
-chess_lib.attacks_to_king_square.argtypes = [POINTER(ChessBoard), c_uint64]
-chess_lib.attacks_to_king_square.restype = c_int
-chess_lib.attacks_to_square.argtypes = [POINTER(ChessBoard), c_int, c_uint64]
-chess_lib.attacks_to_square.restype = c_uint64
+chess_lib.bb_attacks_to_king_square.argtypes = [POINTER(ChessBoard), c_uint64]
+chess_lib.bb_attacks_to_king_square.restype = c_int
+chess_lib.bb_attacks_to_square.argtypes = [POINTER(ChessBoard), c_int, c_uint64]
+chess_lib.bb_attacks_to_square.restype = c_uint64
 
 # Main board functions
 chess_lib.board_init.argtypes = [POINTER(ChessBoard)]
@@ -314,6 +320,7 @@ chess_lib.best_move.restype = c_int
 
 class IllegalMoveError(ValueError):
     """Exception raised when attempting to make an illegal chess move."""
+
     pass
 
 
@@ -1128,7 +1135,12 @@ class BaseBoard:
 
         Must be called after creating a new board instance.
         """
-        chess_lib.bb_init()
+
+        global _bb_initialized
+        if not _bb_initialized:
+            chess_lib.bb_init()
+            _bb_initialized = True
+
         chess_lib.board_init(self.ptr)
 
     def zobrist_key(self) -> BitBoard:
@@ -1233,7 +1245,7 @@ class BaseBoard:
             return None
 
     def attacks_mask(self, square: Square) -> BitBoard:
-        mask: BitBoard = chess_lib.attacks_to_square(
+        mask: BitBoard = chess_lib.bb_attacks_to_square(
             self.ptr, square, self.occ(BOTH).mask
         )
         return mask

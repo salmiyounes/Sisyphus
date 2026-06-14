@@ -1,7 +1,6 @@
 #ifndef SEARCH_H
 #define SEARCH_H
 
-#include "attacks.h"
 #include "bb.h"
 #include "eval.h"
 #include "gen.h"
