@@ -464,9 +464,7 @@ INLINE int illegal_to_move(ChessBoard *board) {
 }
 
 INLINE int is_check(ChessBoard *board) {
-  Move moves[MAX_MOVES];
-  return board->color ? gen_white_checks(board, moves)
-                      : gen_black_checks(board, moves);
+  return bb_is_check(board);
 }
 
 int move_gives_check(ChessBoard *board, const Move move) {

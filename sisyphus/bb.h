@@ -57,7 +57,13 @@ bb bb_get_rook_attacks(int sq, bb obs);
 
 int bb_attacks_to_king_square(ChessBoard *board, bb b_king);
 
+bool bb_is_check(ChessBoard *board);
+
 bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ);
+
+bb bb_pawns_attacks(int sq, int color);
+
+bb bb_get_knight_attacks(int sq);
 
 // Creates piece type combining piece and color
 int make_piece_type(int pc, int color);
