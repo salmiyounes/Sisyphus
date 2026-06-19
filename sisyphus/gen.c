@@ -463,9 +463,7 @@ INLINE int illegal_to_move(ChessBoard *board) {
              : bb_attacks_to_king_square(board, board->bb_squares[BLACK_KING]);
 }
 
-INLINE int is_check(ChessBoard *board) {
-  return bb_is_check(board);
-}
+INLINE int is_check(ChessBoard *board) { return bb_is_check(board); }
 
 int move_gives_check(ChessBoard *board, const Move move) {
   Undo undo;
