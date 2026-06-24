@@ -152,24 +152,27 @@ INLINE int gen_white_king_moves(ChessBoard *board, Move *moves) {
 
 int gen_white_king_castle(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
+  bb occ = board->occ[BOTH];
+  bb them = board->occ[BLACK];
+
   if (board->castle & CASTLE_WHITE_KING_SIDE) {
-    if (!(board->occ[BOTH] & 0x0000000000000060L)) {
-      Move dummy[MAX_MOVES];
-      bb mask = 0x0000000000000030L;
-      if (!(gen_black_attacks_against(board, dummy, mask))) {
+    if (!(occ & 0x0000000000000060L)) {
+      if (!(bb_attacks_to_square(board, 4, occ) & them) &&
+          !(bb_attacks_to_square(board, 5, occ) & them)) {
         EMIT_CASTLE(moves, 4, 6, WHITE_KING);
       }
     }
   }
+
   if (board->castle & CASTLE_WHITE_QUEEN_SIDE) {
-    if (!(board->occ[BOTH] & 0x000000000000000eL)) {
-      Move dummy[MAX_MOVES];
-      bb mask = 0x0000000000000018L;
-      if (!(gen_black_attacks_against(board, dummy, mask))) {
+    if (!(occ & 0x000000000000000eL)) {
+      if (!(bb_attacks_to_square(board, 3, occ) & them) &&
+          !(bb_attacks_to_square(board, 4, occ) & them)) {
         EMIT_CASTLE(moves, 4, 2, WHITE_KING);
       }
     }
   }
+
   return moves - ptr;
 }
 
@@ -331,24 +334,27 @@ INLINE int gen_black_king_moves(ChessBoard *board, Move *moves) {
 
 int gen_black_king_castle(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
+  bb occ = board->occ[BOTH];
+  bb them = board->occ[WHITE];
+
   if (board->castle & CASTLE_BLACK_KING_SIDE) {
-    if (!(board->occ[BOTH] & 0x6000000000000000L)) {
-      Move dummy[MAX_MOVES];
-      bb mask = 0x3000000000000000L;
-      if (!(gen_white_attacks_against(board, dummy, mask))) {
+    if (!(occ & 0x6000000000000000L)) {
+      if (!(bb_attacks_to_square(board, 60, occ) & them) &&
+          !(bb_attacks_to_square(board, 61, occ) & them)) {
         EMIT_CASTLE(moves, 60, 62, BLACK_KING);
       }
     }
   }
+
   if (board->castle & CASTLE_BLACK_QUEEN_SIDE) {
-    if (!(board->occ[BOTH] & 0x0e00000000000000L)) {
-      Move dummy[MAX_MOVES];
-      bb mask = 0x1800000000000000L;
-      if (!(gen_white_attacks_against(board, dummy, mask))) {
+    if (!(occ & 0x0e00000000000000L)) {
+      if (!(bb_attacks_to_square(board, 59, occ) & them) &&
+          !(bb_attacks_to_square(board, 60, occ) & them)) {
         EMIT_CASTLE(moves, 60, 58, BLACK_KING);
       }
     }
   }
+
   return moves - ptr;
 }
 
