@@ -50,13 +50,13 @@ extern int piece_material[13];
 extern int castling_rights[64];
 
 /* Macros */
-#define MAX(x, y) (x ^ ((x ^ y) & -(x < y))) // Get maximum of two values
-#define MIN(x, y) (y ^ ((x ^ y) & -(x < y))) // Get minimum of two values
-#define FLIP(sq) ((sq ^ 56))                 // Flip square vertically
-#define FLIP_63(sq) ((sq ^ 63))              // Flip square diagonally
-#define PIECE(x) (((x) & ~1) >> 1)           // Get piece type from piece code
-#define COLOR(x) ((x) & 1)                   // Get piece color
-#define SWITCH_SIDE(x) (x->color ^= BLACK)   // Switch side to move
+#define MIN(A, B) ((A) < (B) ? (A) : (B))
+#define MAX(A, B) ((A) > (B) ? (A) : (B))
+#define FLIP(sq) ((sq ^ 56))               // Flip square vertically
+#define FLIP_63(sq) ((sq ^ 63))            // Flip square diagonally
+#define PIECE(x) (((x) & ~1) >> 1)         // Get piece type from piece code
+#define COLOR(x) ((x) & 1)                 // Get piece color
+#define SWITCH_SIDE(x) (x->color ^= BLACK) // Switch side to move
 
 // Board manipulation functions
 void board_init(ChessBoard *b);  // Initialize chess board

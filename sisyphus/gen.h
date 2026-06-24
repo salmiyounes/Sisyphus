@@ -6,7 +6,7 @@
 #include "move.h"
 
 /* Macros */
-#define EMIT_MOVE(m, from, to, piece, flag)                                    \
+#define EMIT_MOVE(m, from, to, piece)                                          \
   *(m++) = ENCODE_MOVE(from, to, piece, EMPTY_FLAG); // Emit normal move
 
 #define EMIT_PROMOTION(m, from, to, piece, flag)                               \

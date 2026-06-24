@@ -166,7 +166,6 @@ int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
 }
 
 bool bb_is_check(ChessBoard *board) {
-  bb us = board->occ[board->color];
   bb them = board->occ[!board->color];
   int sq = get_lsb(board->bb_squares[board->color ? BLACK_KING : WHITE_KING]);
 

@@ -106,50 +106,121 @@ typedef struct {
   int depth; // Search depth
 } Entry_t;
 
-#define SQUARE_NB 64
-#define COLOR_NB 2
-#define FILE_NB 8
-#define RANK_NB 8
+enum Square {
+  A1 = 1,
+  B1,
+  C1,
+  D1,
+  E1,
+  F1,
+  G1,
+  H1,
+  A2,
+  B2,
+  C2,
+  D2,
+  E2,
+  F2,
+  G2,
+  H2,
+  A3,
+  B3,
+  C3,
+  D3,
+  E3,
+  F3,
+  G3,
+  H3,
+  A4,
+  B4,
+  C4,
+  D4,
+  E4,
+  F4,
+  G4,
+  H4,
+  A5,
+  B5,
+  C5,
+  D5,
+  E5,
+  F5,
+  G5,
+  H5,
+  A6,
+  B6,
+  C6,
+  D6,
+  E6,
+  F6,
+  G6,
+  H6,
+  A7,
+  B7,
+  C7,
+  D7,
+  E7,
+  F7,
+  G7,
+  H7,
+  A8,
+  B8,
+  C8,
+  D8,
+  E8,
+  F8,
+  G8,
+  H8,
+};
 
-#define PAWN_MATERIAL 100
-#define KNIGHT_MATERIAL 320
-#define BISHOP_MATERIAL 330
-#define ROOK_MATERIAL 500
-#define QUEEN_MATERIAL 900
-#define KING_MATERIAL 20000
+enum BoardDimensions { SQUARE_NB = 64, COLOR_NB = 2, FILE_NB = 8, RANK_NB = 8 };
 
-#define CASTLE_ALL 15
-#define CASTLE_WHITE 3
-#define CASTLE_BLACK 12
-#define CASTLE_WHITE_KING_SIDE 1
-#define CASTLE_WHITE_QUEEN_SIDE 2
-#define CASTLE_BLACK_KING_SIDE 4
-#define CASTLE_BLACK_QUEEN_SIDE 8
+enum PieceValue {
+  PAWN_MATERIAL = 100,
+  KNIGHT_MATERIAL = 320,
+  BISHOP_MATERIAL = 330,
+  ROOK_MATERIAL = 500,
+  QUEEN_MATERIAL = 900,
+  KING_MATERIAL = 20000
+};
 
-#define WHITE 0
-#define BLACK 1
-#define BOTH 2
+enum Color { WHITE = 0, BLACK = 1, BOTH = 2 };
 
-#define PAWN 0
-#define KNIGHT 1
-#define BISHOP 2
-#define ROOK 3
-#define QUEEN 4
-#define KING 5
+enum PieceType {
+  PAWN = 0,
+  KNIGHT = 1,
+  BISHOP = 2,
+  ROOK = 3,
+  QUEEN = 4,
+  KING = 5
+};
 
-#define WHITE_PAWN 0
-#define BLACK_PAWN 1
-#define WHITE_KNIGHT 2
-#define BLACK_KNIGHT 3
-#define WHITE_BISHOP 4
-#define BLACK_BISHOP 5
-#define WHITE_ROOK 6
-#define BLACK_ROOK 7
-#define WHITE_QUEEN 8
-#define BLACK_QUEEN 9
-#define WHITE_KING 10
-#define BLACK_KING 11
-#define NONE 12
+enum ColoredPiece {
+  WHITE_PAWN = 0,
+  BLACK_PAWN = 1,
+  WHITE_KNIGHT = 2,
+  BLACK_KNIGHT = 3,
+  WHITE_BISHOP = 4,
+  BLACK_BISHOP = 5,
+  WHITE_ROOK = 6,
+  BLACK_ROOK = 7,
+  WHITE_QUEEN = 8,
+  BLACK_QUEEN = 9,
+  WHITE_KING = 10,
+  BLACK_KING = 11,
+  NONE = 12
+};
+
+enum CastleRights {
+  CASTLE_WHITE_KING_SIDE = 1 << 0,
+  CASTLE_WHITE_QUEEN_SIDE = 1 << 1,
+  CASTLE_BLACK_KING_SIDE = 1 << 2,
+  CASTLE_BLACK_QUEEN_SIDE = 1 << 3,
+
+  CASTLE_WHITE = CASTLE_WHITE_KING_SIDE | CASTLE_WHITE_QUEEN_SIDE,
+  CASTLE_BLACK = CASTLE_BLACK_KING_SIDE | CASTLE_BLACK_QUEEN_SIDE,
+  CASTLE_ALL = CASTLE_WHITE | CASTLE_BLACK
+};
 
 #define RANK_1 0x00000000000000ffULL
 #define RANK_2 0x000000000000ff00ULL
