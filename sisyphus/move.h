@@ -15,7 +15,7 @@
 #define EMPTY_FLAG 0         // Normal move
 #define ENP_FLAG 6           // En passant capture
 #define CAPTURE_FLAG 4       // Regular capture
-#define CATLE_FLAG 1         // Castling move
+#define CASTLE_FLAG 1        // Castling move
 #define PROMO_FLAG 8         // Base promotion flag
 #define KNIGHT_PROMO_FLAG 8  // Promote to knight
 #define ROOK_PROMO_FLAG 9    // Promote to rook
@@ -28,7 +28,7 @@
   ((bool)((flag) & PROMO_FLAG))                // Check if move is promotion
 #define PROMO_PT(flag) ((flag & 0x3) + KNIGHT) // Get promotion piece type
 #define IS_ENP(flag) ((flag) == ENP_FLAG)      // Check if en passant
-#define IS_CAS(flag) ((flag) == CATLE_FLAG)    // Check if castling
+#define IS_CAS(flag) ((flag) == CASTLE_FLAG)   // Check if castling
 
 // Board update macros
 #define HANDLE_PROMOTION(board, piece, flag, dst, color)                       \
@@ -40,7 +40,7 @@
   if (board->castle)                                                           \
     board->hash ^= HASH_CASTLE[board->castle];                                 \
   if (board->ep)                                                               \
-    board->hash ^= HASH_EP[get_lsb(board->ep) % 8];
+    board->hash ^= HASH_EP[file_of(get_lsb(board->ep))];
 
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)

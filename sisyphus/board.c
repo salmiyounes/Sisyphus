@@ -85,7 +85,7 @@ void init_table() {
 void board_clear(ChessBoard *board) {
   memset(board, 0, sizeof(ChessBoard));
 
-  for (int i = 0; i < 64; i++) {
+  for (int i = 0; i < SQUARE_NB; i++) {
     board->squares[i] = NONE;
   }
 
@@ -151,7 +151,7 @@ void board_init(ChessBoard *board) {
       {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING,
        BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}};
 
-  for (int file = 0; file < 8; file++) {
+  for (int file = 0; file < FILE_NB; file++) {
     board_update(board, square(1, file), WHITE_PAWN);
     board_update(board, square(6, file), BLACK_PAWN);
 

@@ -157,15 +157,15 @@ INLINE bb bb_get_king_attacks(int sq) {
   return BB_KING[sq];
 }
 
-int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
+INLINE int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
   assert(b_king);
-  return (bb_attacks_to_square(board, get_lsb(b_king), board->occ[BOTH]) &
-          board->occ[board->color])
-             ? 1
-             : 0;
+  bb them = board->occ[board->color];
+  bb occ = board->occ[BOTH];
+  int king_sq = get_lsb(b_king);
+  return !!(bb_attacks_to_square(board, king_sq, occ) & them);
 }
 
-bool bb_is_check(ChessBoard *board) {
+INLINE bool bb_is_check(ChessBoard *board) {
   bb them = board->occ[!board->color];
   int sq = get_lsb(board->bb_squares[board->color ? BLACK_KING : WHITE_KING]);
 
@@ -185,7 +185,7 @@ bool bb_is_check(ChessBoard *board) {
            them));
 }
 
-bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ) {
+INLINE bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ) {
   bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
   bb bishops =
       board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];

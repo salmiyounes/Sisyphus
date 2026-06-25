@@ -35,7 +35,7 @@ bool is_tactical_move(ChessBoard *board, const Move move) {
   return is_capture(board, move) || IS_ENP(flag) || IS_PROMO(flag);
 }
 
-void do_move(ChessBoard *board, Move move, Undo *undo) {
+INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
   int src = EXTRACT_FROM(move);
   int dst = EXTRACT_TO(move);
   int piece = EXTRACT_PIECE(move);
@@ -117,7 +117,7 @@ void do_move(ChessBoard *board, Move move, Undo *undo) {
   TOGGLE_HASH(board);
 }
 
-void undo_move(ChessBoard *board, Move move, Undo *undo) {
+INLINE void undo_move(ChessBoard *board, Move move, Undo *undo) {
   int piece = EXTRACT_PIECE(move);
   int src = EXTRACT_FROM(move);
   int dst = EXTRACT_TO(move);

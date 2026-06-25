@@ -1,6 +1,6 @@
 #include "gen.h"
 
-int gen_knight_moves(Move *moves, bb srcs, bb mask, int color) {
+INLINE int gen_knight_moves(Move *moves, bb srcs, bb mask, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
@@ -15,7 +15,7 @@ int gen_knight_moves(Move *moves, bb srcs, bb mask, int color) {
   return moves - ptr;
 }
 
-int gen_bishop_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
+INLINE int gen_bishop_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
@@ -29,7 +29,7 @@ int gen_bishop_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   return moves - ptr;
 }
 
-int gen_rook_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
+INLINE int gen_rook_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
@@ -43,7 +43,7 @@ int gen_rook_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   return moves - ptr;
 }
 
-int gen_queen_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
+INLINE int gen_queen_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
@@ -57,7 +57,7 @@ int gen_queen_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   return moves - ptr;
 }
 
-int gen_king_moves(Move *moves, bb srcs, bb mask, int color) {
+INLINE int gen_king_moves(Move *moves, bb srcs, bb mask, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
@@ -71,7 +71,7 @@ int gen_king_moves(Move *moves, bb srcs, bb mask, int color) {
   return moves - ptr;
 }
 
-int gen_white_pawn_moves(ChessBoard *board, Move *moves) {
+INLINE int gen_white_pawn_moves(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
   bb pawns = board->bb_squares[WHITE_PAWN];
   bb mask = board->occ[BLACK] | board->ep;
@@ -150,7 +150,7 @@ INLINE int gen_white_king_moves(ChessBoard *board, Move *moves) {
                         ~board->occ[WHITE], WHITE);
 }
 
-int gen_white_king_castle(ChessBoard *board, Move *moves) {
+INLINE int gen_white_king_castle(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
   bb occ = board->occ[BOTH];
   bb them = board->occ[BLACK];
@@ -192,7 +192,8 @@ INLINE int gen_white_moves(ChessBoard *board, Move *moves) {
   return moves - ptr;
 }
 
-int gen_white_pawn_attacks_against(ChessBoard *board, Move *moves, bb mask) {
+INLINE int gen_white_pawn_attacks_against(ChessBoard *board, Move *moves,
+                                          bb mask) {
   Move *ptr = moves;
   bb pawns = board->bb_squares[WHITE_PAWN];
   bb a1 = ((pawns & 0xfefefefefefefefeL) << 7) & mask;
@@ -258,7 +259,7 @@ INLINE int gen_white_checks(ChessBoard *board, Move *moves) {
   return gen_white_attacks_against(board, moves, board->bb_squares[BLACK_KING]);
 }
 
-int gen_black_pawn_moves(ChessBoard *board, Move *moves) {
+INLINE int gen_black_pawn_moves(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
   bb pawns = board->bb_squares[BLACK_PAWN];
   bb mask = board->occ[WHITE] | board->ep;
@@ -334,7 +335,7 @@ INLINE int gen_black_king_moves(ChessBoard *board, Move *moves) {
                         ~board->occ[BLACK], BLACK);
 }
 
-int gen_black_king_castle(ChessBoard *board, Move *moves) {
+INLINE int gen_black_king_castle(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
   bb occ = board->occ[BOTH];
   bb them = board->occ[WHITE];
@@ -376,7 +377,8 @@ INLINE int gen_black_moves(ChessBoard *board, Move *moves) {
   return moves - ptr;
 }
 
-int gen_black_pawn_attacks_against(ChessBoard *board, Move *moves, bb mask) {
+INLINE int gen_black_pawn_attacks_against(ChessBoard *board, Move *moves,
+                                          bb mask) {
   Move *ptr = moves;
   bb pawns = board->bb_squares[BLACK_PAWN];
   bb a1 = ((pawns & 0x7f7f7f7f7f7f7f7fL) >> 7) & mask;
@@ -468,9 +470,8 @@ INLINE int gen_legal_moves(ChessBoard *board, Move *moves) {
 }
 
 INLINE int illegal_to_move(ChessBoard *board) {
-  return board->color
-             ? bb_attacks_to_king_square(board, board->bb_squares[WHITE_KING])
-             : bb_attacks_to_king_square(board, board->bb_squares[BLACK_KING]);
+  bb bb_king = board->bb_squares[board->color ? WHITE_KING : BLACK_KING];
+  return bb_attacks_to_king_square(board, bb_king);
 }
 
 INLINE int is_check(ChessBoard *board) { return bb_is_check(board); }

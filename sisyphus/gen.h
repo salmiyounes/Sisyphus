@@ -21,7 +21,7 @@
   *(m++) = ENCODE_MOVE(from, to, piece, ENP_FLAG); // Emit en passant move
 
 #define EMIT_CASTLE(m, from, to, piece)                                        \
-  *(m++) = ENCODE_MOVE(from, to, piece, CATLE_FLAG); // Emit castling move
+  *(m++) = ENCODE_MOVE(from, to, piece, CASTLE_FLAG); // Emit castling move
 
 // White piece move generation
 int gen_white_moves(ChessBoard *board, Move *moves); // Generate all white moves
