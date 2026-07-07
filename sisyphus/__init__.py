@@ -761,7 +761,7 @@ class Move:
             return ""
 
     @classmethod
-    def parse_uci(cls, board: Board, uci: str) -> Move:
+    def parse_uci(cls, board: Board, uci: object) -> Move:
         if not isinstance(uci, str):
             raise ValueError("UCI must be a string")
         if len(uci) not in (4, 5):
@@ -1155,7 +1155,7 @@ class BaseBoard:
         hash = self.baseboard.hash
         return BitBoard(hash)
 
-    def occ(self, color: Color) -> SquareSet:
+    def occ(self, color: object) -> SquareSet:
         """Get a bitboard of all pieces of a given color.
 
         Args:
@@ -1174,7 +1174,7 @@ class BaseBoard:
         mask: BitBoard = self.baseboard.occ[color]
         return SquareSet(mask)
 
-    def _get_piece_squares(self, piece: Piece, color: Color) -> SquareSet:
+    def _get_piece_squares(self, piece: Piece, color: object) -> SquareSet:
         if not isinstance(color, Color) or color < WHITE or color > BLACK:
             raise ValueError(
                 f"Invalid color value: {color}. Must be WHITE (0), BLACK (1)"
@@ -1201,7 +1201,7 @@ class BaseBoard:
     def kings(self, color: Color) -> SquareSet:
         return self._get_piece_squares(KING, color)
 
-    def king_sq(self, color: Color) -> Square:
+    def king_sq(self, color: object) -> Square:
         if not isinstance(color, Color) or color < WHITE or color > BOTH:
             raise ValueError(
                 f"Invalid color value: {color}. Must be WHITE (0), BLACK (1) or BOTH (2)"
@@ -1457,7 +1457,7 @@ class Board:
         """
         return self.board.board_to_fen()
 
-    def set_fen(self, fen: str) -> None:
+    def set_fen(self, fen: object) -> None:
         """Set the board position from a FEN string.
 
         Args:
@@ -1574,7 +1574,7 @@ class Board:
         king_sq: int = self.board.king_sq(color)
         return self.attackers(not color, king_sq)
 
-    def is_square_attacked_by(self, color: Color, square: Square) -> bool:
+    def is_square_attacked_by(self, color: Color, square: object) -> bool:
         """Check if a square is attacked by any piece of the given color.
 
         Args:
@@ -1593,11 +1593,11 @@ class Board:
             >>> board.is_square_attacked_by(WHITE, D5)
             True
         """
-        if not isinstance(square, int) or not (0 <= square < SQUARE_NB):
+        if not isinstance(square, Square) or not (0 <= square < SQUARE_NB):
             raise ValueError(f"Invalid square index: {square}")
         return bool(self.board.attacks(color, square))
 
-    def attackers(self, color: Color, square: Square) -> SquareSet:
+    def attackers(self, color: Color, square: object) -> SquareSet:
         """Get all pieces of a given color that attack a specific square.
 
         This method returns a bitboard containing all pieces of the specified color
@@ -1626,7 +1626,7 @@ class Board:
             . . . . . . . .
             . . . . . . . .
         """
-        if not isinstance(square, int) or not (0 <= square < SQUARE_NB):
+        if not isinstance(square, Square) or not (0 <= square < SQUARE_NB):
             raise ValueError(f"Invalid square index: {square}")
         return self.board.attacks(color, square)
 
@@ -1774,9 +1774,6 @@ class PseudoLegalMoveGenerator:
 
     def __bool__(self) -> bool:
         return any(self.board.generate_pseudo_legal_moves())
-
-    def __len__(self) -> int:
-        return len(list(self))
 
     def __iter__(self) -> Iterator[Move]:
         return self.board.generate_pseudo_legal_moves()

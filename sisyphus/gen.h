@@ -6,6 +6,10 @@
 #include "move.h"
 
 /* Macros */
+#define EMIT_MOVE_WITH_COLOR(m, from, to, piece, color)                        \
+  *(m++) = ENCODE_MOVE(from, to, (make_piece_type(piece, color)),              \
+                       EMPTY_FLAG); // Emit normal move
+
 #define EMIT_MOVE(m, from, to, piece)                                          \
   *(m++) = ENCODE_MOVE(from, to, piece, EMPTY_FLAG); // Emit normal move
 
