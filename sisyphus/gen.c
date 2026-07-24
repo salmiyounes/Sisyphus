@@ -153,13 +153,12 @@ INLINE int gen_white_king_moves(ChessBoard *board, Move *moves) {
 INLINE int gen_white_king_castle(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
   bb occ = board->occ[BOTH];
-  bb them = board->occ[BLACK];
 
   if (board->castle & CASTLE_WHITE_KING_SIDE) {
     bb mask = BIT(E1) | BIT(F1);
     if (!(occ & mask)) {
-      if (!(bb_attacks_to_square(board, D1, occ) & them) &&
-          !(bb_attacks_to_square(board, E1, occ) & them)) {
+      if (!(is_square_attacked_by(board, D1, BLACK)) &&
+          !(is_square_attacked_by(board, E1, BLACK))) {
         EMIT_CASTLE(moves, D1, F1, WHITE_KING);
       }
     }
@@ -168,8 +167,8 @@ INLINE int gen_white_king_castle(ChessBoard *board, Move *moves) {
   if (board->castle & CASTLE_WHITE_QUEEN_SIDE) {
     bb mask = BIT(A1) | BIT(B1) | BIT(C1);
     if (!(occ & mask)) {
-      if (!(bb_attacks_to_square(board, C1, occ) & them) &&
-          !(bb_attacks_to_square(board, D1, occ) & them)) {
+      if (!(is_square_attacked_by(board, C1, BLACK)) &&
+          !(is_square_attacked_by(board, D1, BLACK))) {
         EMIT_CASTLE(moves, D1, B1, WHITE_KING);
       }
     }
@@ -338,13 +337,12 @@ INLINE int gen_black_king_moves(ChessBoard *board, Move *moves) {
 INLINE int gen_black_king_castle(ChessBoard *board, Move *moves) {
   Move *ptr = moves;
   bb occ = board->occ[BOTH];
-  bb them = board->occ[WHITE];
 
   if (board->castle & CASTLE_BLACK_KING_SIDE) {
     bb mask = BIT(E8) | BIT(F8);
     if (!(occ & mask)) {
-      if (!(bb_attacks_to_square(board, D8, occ) & them) &&
-          !(bb_attacks_to_square(board, E8, occ) & them)) {
+      if (!(is_square_attacked_by(board, D8, WHITE)) &&
+          !(is_square_attacked_by(board, E8, WHITE))) {
         EMIT_CASTLE(moves, D8, F8, BLACK_KING);
       }
     }
@@ -353,8 +351,8 @@ INLINE int gen_black_king_castle(ChessBoard *board, Move *moves) {
   if (board->castle & CASTLE_BLACK_QUEEN_SIDE) {
     bb mask = BIT(A8) | BIT(B8) | BIT(C8);
     if (!(occ & mask)) {
-      if (!(bb_attacks_to_square(board, C8, occ) & them) &&
-          !(bb_attacks_to_square(board, D8, occ) & them)) {
+      if (!(is_square_attacked_by(board, C8, WHITE)) &&
+          !(is_square_attacked_by(board, D8, WHITE))) {
         EMIT_CASTLE(moves, D8, B8, BLACK_KING);
       }
     }

@@ -59,6 +59,9 @@ int bb_attacks_to_king_square(ChessBoard *board, bb b_king);
 
 bool bb_is_check(ChessBoard *board);
 
+bool is_square_attacked_by(ChessBoard *board, enum Square square,
+                           enum Color color);
+
 bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ);
 
 bb bb_pawns_attacks(int sq, int color);

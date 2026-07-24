@@ -116,6 +116,13 @@ int make_piece_type(int pc, int color) {
   return (pc << 1) + color;
 }
 
+bool is_square_attacked_by(ChessBoard *board, enum Square square,
+                           enum Color color) {
+  bb occ = board->occ[BOTH];
+  bb them = board->occ[color];
+  return !!(bb_attacks_to_square(board, square, occ) & them);
+}
+
 int bb_squares(bb value, int squares[64]) {
   int i = 0;
   int sq;
@@ -159,10 +166,8 @@ INLINE bb bb_get_king_attacks(int sq) {
 
 INLINE int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
   assert(b_king);
-  bb them = board->occ[board->color];
-  bb occ = board->occ[BOTH];
   int king_sq = get_lsb(b_king);
-  return !!(bb_attacks_to_square(board, king_sq, occ) & them);
+  return is_square_attacked_by(board, king_sq, board->color);
 }
 
 INLINE bool bb_is_check(ChessBoard *board) {
