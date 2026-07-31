@@ -1,6 +1,6 @@
 #include "gen.h"
 
-INLINE int gen_knight_moves(Move *moves, bb srcs, bb mask, int color) {
+INLINE int gen_knight_moves(Move *moves, bb srcs, bb mask, enum Color color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {

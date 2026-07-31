@@ -89,7 +89,7 @@ int popcount(bb bbit) { return __builtin_popcountll(bbit); }
 
 int several(bb bbit) { return bbit & (bbit - 1); }
 
-bool test_bit(bb bbit, const int sq) {
+bool test_bit(bb bbit, const enum Square sq) {
   assert(sq >= 0 && sq < SQUARE_NB);
   return (bool)(bbit & BIT(sq));
 }
@@ -100,17 +100,17 @@ int square(int rank, int file) {
   return rank * FILE_NB + file;
 }
 
-int file_of(int sq) {
+int file_of(enum Square sq) {
   assert(0 <= sq && sq < SQUARE_NB);
   return sq % FILE_NB;
 }
 
-int rank_of(int sq) {
+int rank_of(enum Square sq) {
   assert(0 <= sq && sq < SQUARE_NB);
   return sq / RANK_NB;
 }
 
-int make_piece_type(int pc, int color) {
+int make_piece_type(enum PieceType pc, enum Color color) {
   assert(color == WHITE || color == BLACK);
   assert(pc >= PAWN && pc <= KING);
   return (pc << 1) + color;
@@ -133,33 +133,33 @@ int bb_squares(bb value, int squares[64]) {
   return i;
 }
 
-INLINE bb bb_get_pawns_attacks(int sq, int color) {
+INLINE bb bb_get_pawns_attacks(enum Square sq, enum Color color) {
   assert(sq >= 0 && sq < SQUARE_NB);
   assert(color == WHITE || color == BLACK);
   return BB_PAWNS[color][sq];
 }
 
-INLINE bb bb_get_bishop_attacks(int sq, bb obs) {
+INLINE bb bb_get_bishop_attacks(enum Square sq, bb obs) {
   assert(sq >= 0 && sq < SQUARE_NB);
   return bb_bishop(sq, obs);
 }
 
-INLINE bb bb_get_knight_attacks(int sq) {
+INLINE bb bb_get_knight_attacks(enum Square sq) {
   assert(sq >= 0 && sq < SQUARE_NB);
   return BB_KNIGHT[sq];
 }
 
-INLINE bb bb_get_rook_attacks(int sq, bb obs) {
+INLINE bb bb_get_rook_attacks(enum Square sq, bb obs) {
   assert(sq >= 0 && sq < SQUARE_NB);
   return bb_rook(sq, obs);
 }
 
-INLINE bb bb_get_queen_attacks(int sq, bb obs) {
+INLINE bb bb_get_queen_attacks(enum Square sq, bb obs) {
   assert(sq >= 0 && sq < SQUARE_NB);
   return bb_queen(sq, obs);
 }
 
-INLINE bb bb_get_king_attacks(int sq) {
+INLINE bb bb_get_king_attacks(enum Square sq) {
   assert(sq >= 0 && sq < SQUARE_NB);
   return BB_KING[sq];
 }
@@ -190,7 +190,7 @@ INLINE bool bb_is_check(ChessBoard *board) {
            them));
 }
 
-INLINE bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ) {
+INLINE bb bb_attacks_to_square(ChessBoard *board, enum Square sq, bb occ) {
   bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
   bb bishops =
       board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];
@@ -208,14 +208,14 @@ INLINE bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ) {
          (bb_get_king_attacks(sq) & kings);
 }
 
-bb bb_pawns_attacks(int sq, int color) {
+bb bb_pawns_attacks(enum Square sq, enum Color color) {
   assert(sq >= 0 && sq < SQUARE_NB);
   const bb board = BIT(sq);
   return color ? ((board & ~FILE_H) >> 7) | ((board & ~FILE_A) >> 9)
                : ((board & ~FILE_A) << 7) | ((board & ~FILE_H) << 9);
 }
 
-bb bb_slide(int sq, int truncate, bb obs, int directions[4][2]) {
+bb bb_slide(enum Square sq, int truncate, bb obs, int directions[4][2]) {
   bb value = 0;
   int rank = rank_of(sq);
   int file = file_of(sq);
@@ -241,13 +241,12 @@ bb bb_slide(int sq, int truncate, bb obs, int directions[4][2]) {
   return value;
 }
 
-bb bb_slide_bishop(int sq, int truncate, bb obs) {
+bb bb_slide_bishop(enum Square sq, int truncate, bb obs) {
   int directions[4][2] = {{-1, -1}, {-1, 1}, {1, -1}, {1, 1}};
-
   return bb_slide(sq, truncate, obs, directions);
 }
 
-bb bb_slide_rook(int sq, int truncate, bb obs) {
+bb bb_slide_rook(enum Square sq, int truncate, bb obs) {
   int directions[4][2] = {{-1, 0}, {1, 0}, {0, -1}, {0, 1}};
   return bb_slide(sq, truncate, obs, directions);
 }
@@ -354,19 +353,19 @@ void bb_init() {
   }
 }
 
-bb bb_bishop(int sq, bb obs) {
+bb bb_bishop(enum Square sq, bb obs) {
   bb value = obs & BB_BISHOP[sq];
   int index = (value * MAGIC_BISHOP[sq]) >> SHIFT_BISHOP[sq];
   return ATTACK_BISHOP[index + OFFSET_BISHOP[sq]];
 }
 
-bb bb_rook(int sq, bb obs) {
+bb bb_rook(enum Square sq, bb obs) {
   bb value = obs & BB_ROOK[sq];
   int index = (value * MAGIC_ROOK[sq]) >> SHIFT_ROOK[sq];
   return ATTACK_ROOK[index + OFFSET_ROOK[sq]];
 }
 
-bb bb_queen(int sq, bb obs) { return bb_bishop(sq, obs) | bb_rook(sq, obs); }
+bb bb_queen(enum Square sq, bb obs) { return bb_bishop(sq, obs) | bb_rook(sq, obs); }
 
 void bb_print(bb bbit) {
   for (int r = RANK_NB - 1; r >= 0; r--) {

@@ -40,20 +40,20 @@ int popcount(bb bbit);
 int several(bb bbit);
 
 // Tests if specific square is set in bitboard
-bool test_bit(bb bbit, const int sq);
+bool test_bit(bb bbit, const enum Square sq);
 
 // Gets file number (0-7) of a square
-int file_of(int sq);
+int file_of(enum Square sq);
 
 // Gets rank number (0-7) of a square
-int rank_of(int sq);
+int rank_of(enum Square sq);
 
 // Converts rank and file to square index
 int square(int rank, int file);
 
-bb bb_get_bishop_attacks(int sq, bb obs);
+bb bb_get_bishop_attacks(enum Square sq, bb obs);
 
-bb bb_get_rook_attacks(int sq, bb obs);
+bb bb_get_rook_attacks(enum Square sq, bb obs);
 
 int bb_attacks_to_king_square(ChessBoard *board, bb b_king);
 
@@ -62,23 +62,23 @@ bool bb_is_check(ChessBoard *board);
 bool is_square_attacked_by(ChessBoard *board, enum Square square,
                            enum Color color);
 
-bb bb_attacks_to_square(ChessBoard *board, int sq, bb occ);
+bb bb_attacks_to_square(ChessBoard *board, enum Square sq, bb occ);
 
-bb bb_pawns_attacks(int sq, int color);
+bb bb_pawns_attacks(enum Square sq, enum Color color);
 
-bb bb_get_knight_attacks(int sq);
+bb bb_get_knight_attacks(enum Square sq);
 
 // Creates piece type combining piece and color
-int make_piece_type(int pc, int color);
+int make_piece_type(enum PieceType pc, enum Color color);
 
 // Gets bishop attacks from square considering obstacles
-bb bb_bishop(int sq, bb obs);
+bb bb_bishop(enum Square sq, bb obs);
 
 // Gets rook attacks from square considering obstacles
-bb bb_rook(int sq, bb obs);
+bb bb_rook(enum Square sq, bb obs);
 
 // Gets queen attacks from square considering obstacles
-bb bb_queen(int sq, bb obs);
+bb bb_queen(enum Square sq, bb obs);
 
 // Prints visual representation of bitboard
 void bb_print(bb bbit);
