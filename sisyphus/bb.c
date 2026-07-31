@@ -365,7 +365,9 @@ bb bb_rook(enum Square sq, bb obs) {
   return ATTACK_ROOK[index + OFFSET_ROOK[sq]];
 }
 
-bb bb_queen(enum Square sq, bb obs) { return bb_bishop(sq, obs) | bb_rook(sq, obs); }
+bb bb_queen(enum Square sq, bb obs) {
+  return bb_bishop(sq, obs) | bb_rook(sq, obs);
+}
 
 void bb_print(bb bbit) {
   for (int r = RANK_NB - 1; r >= 0; r--) {

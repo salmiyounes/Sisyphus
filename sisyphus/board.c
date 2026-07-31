@@ -101,7 +101,8 @@ void board_clear(ChessBoard *board) {
   board->eg[WHITE] = board->eg[BLACK] = 0;
 }
 
-INLINE void board_update(ChessBoard *board, enum Square sq, enum ColoredPiece piece) {
+INLINE void board_update(ChessBoard *board, enum Square sq,
+                         enum ColoredPiece piece) {
   ASSERT(piece >= WHITE_PAWN && piece <= NONE);
   ASSERT(sq >= 0 && sq < SQUARE_NB);
 

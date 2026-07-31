@@ -64,7 +64,8 @@ void print_board(ChessBoard *b); // Print board representation
 void board_load_fen(ChessBoard *board,
                     const char *fen);            // Load position from FEN
 void board_to_fen(ChessBoard *board, char *fen); // Convert position to FEN
-void board_update(ChessBoard *board, enum Square sq, enum ColoredPiece piece); // Update board state
+void board_update(ChessBoard *board, enum Square sq,
+                  enum ColoredPiece piece); // Update board state
 
 // Game state evaluation
 int board_drawn_by_insufficient_material(

@@ -62,8 +62,9 @@ int gen_black_attacks_against(ChessBoard *board, Move *moves,
                               bb mask); // Generate black attacks to squares
 
 // General move generation
-int gen_knight_moves(Move *moves, bb srcs, bb mask,
-                     enum Color color); // Generate knight moves for given squares
+int gen_knight_moves(
+    Move *moves, bb srcs, bb mask,
+    enum Color color); // Generate knight moves for given squares
 int gen_attacks(ChessBoard *board, Move *moves); // Generate all attacking moves
 int gen_legal_moves(ChessBoard *board, Move *moves); // Generate all legal moves
 int gen_moves(ChessBoard *board, Move *moves); // Generate all possible moves
