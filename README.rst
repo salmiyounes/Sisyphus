@@ -2,6 +2,10 @@
 Sisyphus
 ========
 
+.. image:: https://github.com/salmiyounes/Sisyphus/actions/workflows/ci.yaml/badge.svg
+   :alt: https://github.com/salmiyounes/Sisyphus/actions/
+   :target: CI
+
 .. image:: https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=bullet
    :alt: Lichess bullet ranking
    :target: https://lichess.org
