@@ -5,28 +5,6 @@
 #include "board.h"
 #include "move.h"
 
-/* Macros */
-#define EMIT_MOVE_WITH_COLOR(m, from, to, piece, color)                        \
-  *(m++) = ENCODE_MOVE(from, to, (make_piece_type(piece, color)),              \
-                       EMPTY_FLAG); // Emit normal move
-
-#define EMIT_MOVE(m, from, to, piece)                                          \
-  *(m++) = ENCODE_MOVE(from, to, piece, EMPTY_FLAG); // Emit normal move
-
-#define EMIT_PROMOTION(m, from, to, piece, flag)                               \
-  *(m++) = ENCODE_MOVE(from, to, piece, flag) // Emit promotion move
-
-#define EMIT_PROMOTIONS(m, from, to, piece)                                    \
-  for (int flag = KNIGHT_PROMO_FLAG; flag <= QUEEN_PROMO_FLAG;                 \
-       EMIT_PROMOTION(m, from, to, piece, flag),                               \
-           flag++) // Emit all promotion types
-
-#define EMIT_EN_PASSANT(m, from, to, piece)                                    \
-  *(m++) = ENCODE_MOVE(from, to, piece, ENP_FLAG); // Emit en passant move
-
-#define EMIT_CASTLE(m, from, to, piece)                                        \
-  *(m++) = ENCODE_MOVE(from, to, piece, CASTLE_FLAG); // Emit castling move
-
 // White piece move generation
 int gen_white_moves(ChessBoard *board, Move *moves); // Generate all white moves
 int gen_white_pawn_moves(ChessBoard *board,
