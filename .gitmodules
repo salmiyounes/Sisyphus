@@ -1,0 +1,3 @@
+[submodule "sisyphus/C-Thread-Pool"]
+	path = sisyphus/C-Thread-Pool
+	url = https://github.com/salmiyounes/C-Thread-Pool
