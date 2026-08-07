@@ -8,7 +8,7 @@ void swap_any(void *a, void *b, size_t s) {
   free(temp);
 }
 
-char *strdup(const char *src) {
+char *xstrdup(const char *src) {
   if (src == NULL)
     return NULL;
 

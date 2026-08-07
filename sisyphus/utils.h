@@ -9,7 +9,7 @@
 void swap_any(void *a, void *b, size_t s);
 
 // String duplication function
-char *strdup(const char *src);
+char *xstrdup(const char *src);
 
 // Random number generator using xorshift algorithm
 bb xorshift64();
