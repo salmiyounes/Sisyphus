@@ -237,7 +237,7 @@ void board_load_fen(ChessBoard *board, const char *fen) {
 
   int rank = 7, file = 0;
   char ch;
-  char *str = strdup(fen), *save_p = NULL;
+  char *str = xstrdup(fen), *save_p = NULL;
   if (str == NULL)
     return;
   char *token = strtok_r(str, " ", &save_p);
