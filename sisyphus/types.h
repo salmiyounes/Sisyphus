@@ -22,6 +22,13 @@
 #define ASSERT(expr) ((void)0)
 #endif
 
+#define SWAP(x, y)                                                             \
+  do {                                                                         \
+    __typeof__(x) _temp = (x);                                                 \
+    (x) = (y);                                                                 \
+    (y) = _temp;                                                               \
+  } while (0)
+
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof(*(arr)))
 
 typedef unsigned long long

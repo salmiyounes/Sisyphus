@@ -32,8 +32,8 @@ void sort_moves(Search *search, ChessBoard *board, Move *moves, int count,
   for (int i = 1; i < count; i++) {
     int j = i;
     while (j > 0 && scores[j - 1] < scores[j]) {
-      swap_any(&scores[j - 1], &scores[j], sizeof(int));
-      swap_any(&indexes[j - 1], &indexes[j], sizeof(int));
+      SWAP(scores[j - 1], scores[j]);
+      SWAP(indexes[j - 1], indexes[j]);
       j--;
     }
   }
