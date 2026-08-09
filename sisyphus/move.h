@@ -44,14 +44,26 @@
 
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)
-#define ENCODE_MOVE(from, to, piece, flag)                                     \
-  (((from) | ((to) << 6) | ((piece) << 12) | ((flag) << 16)))
+static INLINE Move encode_move(enum Square from, enum Square to,
+                               enum ColoredPiece piece, int flag) {
+  return (Move)(((from) | ((to) << 6) | ((piece) << 12) | ((flag) << 16)));
+}
 
-// Move decoding macros
-#define EXTRACT_FROM(move) ((int)(((move) >> 0) & 0x3f))  // Get source square
-#define EXTRACT_TO(move) ((int)(((move) >> 6) & 0x3f))    // Get target square
-#define EXTRACT_FLAGS(move) ((int)(((move) >> 16) & 0xf)) // Get move flags
-#define EXTRACT_PIECE(move) ((int)(((move) >> 12) & 0xf)) // Get piece type
+static INLINE enum Square extract_from(const Move move) {
+  return (enum Square)((move >> 0) & 0x3f);
+}
+
+static INLINE enum Square extract_to(const Move move) {
+  return (enum Square)((move >> 6) & 0x3f);
+}
+
+static INLINE enum ColoredPiece extract_piece(const Move move) {
+  return (enum ColoredPiece)((move >> 12) & 0xf);
+}
+
+static INLINE int extract_flags(const Move move) {
+  return (int)((move >> 16) & 0xf);
+}
 
 // Move scoring tables
 extern int History_Heuristic[COLOR_NB][SQUARE_NB][SQUARE_NB];
