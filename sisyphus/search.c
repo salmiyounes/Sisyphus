@@ -23,8 +23,8 @@ void sort_moves(Search *search, ChessBoard *board, Move *moves, int count,
       else if (KILLER_MOVES[BLACK][ply] == move)
         scores[i] += 8000;
       else
-        scores[i] += History_Heuristic[board->color][EXTRACT_FROM(move)]
-                                      [EXTRACT_TO(move)];
+        scores[i] += History_Heuristic[board->color][extract_from(move)]
+                                      [extract_to(move)];
     }
     indexes[i] = i;
   }
@@ -230,7 +230,7 @@ int negamax(Search *search, ChessBoard *board, int depth, int ply, int alpha,
 
     if (value > alpha) {
       if (!is_capture(board, move)) {
-        History_Heuristic[board->color][EXTRACT_FROM(move)][EXTRACT_TO(move)] +=
+        History_Heuristic[board->color][extract_from(move)][extract_to(move)] +=
             depth * depth;
       }
       flag = EXACT;
@@ -249,10 +249,10 @@ stop_loop:
 }
 
 int staticExchangeEvaluation(ChessBoard *board, Move move, int threshold) {
-  int src = EXTRACT_FROM(move);
-  int dst = EXTRACT_TO(move);
-  int flag = EXTRACT_FLAGS(move);
-  int piece = EXTRACT_PIECE(move);
+  int src = extract_from(move);
+  int dst = extract_to(move);
+  int flag = extract_flags(move);
+  int piece = extract_piece(move);
 
   if (IS_CAS(flag) || IS_ENP(flag) || IS_PROMO(flag))
     return 1;

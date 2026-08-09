@@ -74,8 +74,8 @@ void init_table() {
   int pc, p, sq;
   for (p = PAWN, pc = WHITE_PAWN; p <= KING; pc += 2, p++) {
     for (sq = 0; sq < 64; sq++) {
-      mg_table[pc][sq] = mg_value[p] + mg_pesto_table[p][FLIP(sq)];
-      eg_table[pc][sq] = eg_value[p] + eg_pesto_table[p][FLIP(sq)];
+      mg_table[pc][sq] = mg_value[p] + mg_pesto_table[p][flip(sq)];
+      eg_table[pc][sq] = eg_value[p] + eg_pesto_table[p][flip(sq)];
       mg_table[pc + 1][sq] = mg_value[p] + mg_pesto_table[p][sq];
       eg_table[pc + 1][sq] = eg_value[p] + eg_pesto_table[p][sq];
     }
@@ -112,28 +112,28 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   if (prev != NONE) {
     CLEAR_BIT(board->occ[BOTH], sq);
     CLEAR_BIT(board->bb_squares[prev], sq);
-    if (COLOR(prev)) {
+    if (piece_color(prev)) {
       CLEAR_BIT(board->occ[BLACK], sq);
     } else {
       CLEAR_BIT(board->occ[WHITE], sq);
     }
     board->hash ^= HASH_PIECES[prev][sq];
-    board->mg[COLOR(prev)] -= mg_table[prev][sq];
-    board->eg[COLOR(prev)] -= eg_table[prev][sq];
+    board->mg[piece_color(prev)] -= mg_table[prev][sq];
+    board->eg[piece_color(prev)] -= eg_table[prev][sq];
     board->gamePhase -= gamephaseInc[prev];
   }
 
   if (piece != NONE) {
     SET_BIT(board->occ[BOTH], sq);
     SET_BIT(board->bb_squares[piece], sq);
-    if (COLOR(piece)) {
+    if (piece_color(piece)) {
       SET_BIT(board->occ[BLACK], sq);
     } else {
       SET_BIT(board->occ[WHITE], sq);
     }
     board->hash ^= HASH_PIECES[piece][sq];
-    board->mg[COLOR(piece)] += mg_table[piece][sq];
-    board->eg[COLOR(piece)] += eg_table[piece][sq];
+    board->mg[piece_color(piece)] += mg_table[piece][sq];
+    board->eg[piece_color(piece)] += eg_table[piece][sq];
     board->gamePhase += gamephaseInc[piece];
   }
 }
@@ -350,7 +350,7 @@ void board_to_fen(ChessBoard *board, char *fen) {
       if (p != NONE) {
         if (cnt)
           *fen++ = cnt + '0';
-        *fen++ = PIECE_LABEL[COLOR(p)][PIECE(p)];
+        *fen++ = PIECE_LABEL[piece_color(p)][piece_type(p)];
         cnt = 0;
       } else
         cnt++;
