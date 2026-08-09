@@ -94,6 +94,18 @@ bool test_bit(bb bbit, const enum Square sq) {
   return (bool)(bbit & BIT(sq));
 }
 
+enum Color piece_color(enum ColoredPiece piece) {
+  return (enum Color)(piece & 1);
+}
+
+enum PieceType piece_type(enum ColoredPiece piece) {
+  return (enum PieceType)((piece & ~1) >> 1);
+}
+
+enum Square flip(enum Square square) { return (enum Square)(square ^ 56); }
+
+enum Square flip_63(enum Square square) { return (enum Square)(square ^ 63); }
+
 int square(int rank, int file) {
   assert(0 <= rank && rank < RANK_NB);
   assert(0 <= file && file < FILE_NB);

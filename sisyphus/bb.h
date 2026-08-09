@@ -42,6 +42,14 @@ int several(bb bbit);
 // Tests if specific square is set in bitboard
 bool test_bit(bb bbit, const enum Square sq);
 
+enum Color piece_color(enum ColoredPiece piece);
+
+enum PieceType piece_type(enum ColoredPiece piece);
+
+enum Square flip(enum Square square);
+
+enum Square flip_63(enum Square square);
+
 // Gets file number (0-7) of a square
 int file_of(enum Square sq);
 
