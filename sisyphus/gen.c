@@ -3,7 +3,7 @@
 // Helper functions
 INLINE void emit_move(Move **moves, enum Square from, enum Square to,
                       enum ColoredPiece piece, int flag) {
-  *(*moves)++ = ENCODE_MOVE(from, to, piece, flag);
+  *(*moves)++ = encode_move(from, to, piece, flag);
 }
 
 INLINE void emit_move_with_empty_flag(Move **moves, enum Square from,
@@ -13,7 +13,7 @@ INLINE void emit_move_with_empty_flag(Move **moves, enum Square from,
 
 INLINE void emit_move_with_color(Move **moves, enum Square from, enum Square to,
                                  enum PieceType piece, enum Color color) {
-  emit_move(moves, from, to, make_piece_type(piece, color), EMPTY_FLAG);
+  emit_move_with_empty_flag(moves, from, to, make_piece_type(piece, color));
 }
 
 INLINE void emit_promotion(Move **moves, enum Square from, enum Square to,
