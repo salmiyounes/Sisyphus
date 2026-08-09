@@ -27,20 +27,20 @@ void make_move(ChessBoard *board, Move move) {
 }
 
 bool is_capture(ChessBoard *board, const Move move) {
-  return (bool)(board->squares[EXTRACT_TO(move)] != NONE);
+  return (bool)(board->squares[extract_to(move)] != NONE);
 }
 
 bool is_tactical_move(ChessBoard *board, const Move move) {
-  int flag = EXTRACT_FLAGS(move);
+  int flag = extract_flags(move);
   return is_capture(board, move) || IS_ENP(flag) || IS_PROMO(flag);
 }
 
 INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
-  int src = EXTRACT_FROM(move);
-  int dst = EXTRACT_TO(move);
-  int piece = EXTRACT_PIECE(move);
-  int color = COLOR(piece);
-  int flag = EXTRACT_FLAGS(move);
+  int src = extract_from(move);
+  int dst = extract_to(move);
+  int piece = extract_piece(move);
+  int color = piece_color(piece);
+  int flag = extract_flags(move);
 
   ASSERT((src >= 0 && src < SQUARE_NB) && (dst >= 0 && dst < SQUARE_NB));
   ASSERT(piece >= WHITE_PAWN && piece <= NONE);
@@ -118,10 +118,10 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
 }
 
 INLINE void undo_move(ChessBoard *board, Move move, Undo *undo) {
-  int piece = EXTRACT_PIECE(move);
-  int src = EXTRACT_FROM(move);
-  int dst = EXTRACT_TO(move);
-  int flag = EXTRACT_FLAGS(move);
+  int piece = extract_piece(move);
+  int src = extract_from(move);
+  int dst = extract_to(move);
+  int flag = extract_flags(move);
 
   ASSERT((src >= 0 && src < SQUARE_NB) && (dst >= 0 && dst < SQUARE_NB));
   ASSERT(piece >= WHITE_PAWN && piece <= NONE);
@@ -195,17 +195,17 @@ void undo_null_move_pruning(ChessBoard *board, Undo *undo) {
 }
 
 void score_moves(ChessBoard *board, Move move, int *score) {
-  int piece = EXTRACT_PIECE(move);
-  int src = EXTRACT_FROM(move), dst = EXTRACT_TO(move),
-      flag = EXTRACT_FLAGS(move);
-  int color = COLOR(piece), result = 0;
-  int attacker = PIECE(EXTRACT_PIECE(move)),
-      victim = PIECE(board->squares[dst]);
+  int piece = extract_piece(move);
+  int src = extract_from(move), dst = extract_to(move),
+      flag = extract_flags(move);
+  int color = piece_color(piece), result = 0;
+  int attacker = piece_type(extract_piece(move)),
+      victim = piece_type(board->squares[dst]);
 
   result =
       (color == WHITE)
           ? square_values[piece][(dst)] - square_values[piece][(src)]
-          : square_values[piece][FLIP(dst)] - square_values[piece][FLIP(src)];
+          : square_values[piece][flip(dst)] - square_values[piece][flip(src)];
 
   if (is_capture(board, move))
     result += MVV_LVA[victim][attacker] + 10000;
@@ -213,8 +213,8 @@ void score_moves(ChessBoard *board, Move move, int *score) {
   if (IS_PROMO(flag))
     result += (color == WHITE) ? square_values[PROMO_PT(flag)][dst] -
                                      square_values[WHITE_PAWN][dst]
-                               : square_values[PROMO_PT(flag)][FLIP(dst)] -
-                                     square_values[BLACK_PAWN][FLIP(dst)];
+                               : square_values[PROMO_PT(flag)][flip(dst)] -
+                                     square_values[BLACK_PAWN][flip(dst)];
   else if (IS_ENP(flag))
     result += MVV_LVA[PAWN][PAWN] + 10000;
 
@@ -222,8 +222,8 @@ void score_moves(ChessBoard *board, Move move, int *score) {
 }
 
 INLINE int move_estimated_value(ChessBoard *board, Move move) {
-  int flag = EXTRACT_FLAGS(move);
-  int value = SEEPieceValues[PIECE(board->squares[EXTRACT_TO(move)])];
+  int flag = extract_flags(move);
+  int value = SEEPieceValues[piece_type(board->squares[extract_to(move)])];
 
   if (IS_PROMO(flag))
     value += SEEPieceValues[PROMO_PT(flag)] - SEEPieceValues[PAWN];
@@ -239,14 +239,14 @@ INLINE int move_estimated_value(ChessBoard *board, Move move) {
 
 char *move_to_str(Move move) {
   static char buffer[6];
-  int src = EXTRACT_FROM(move), dst = EXTRACT_TO(move);
-  int flag = EXTRACT_FLAGS(move);
+  int src = extract_from(move), dst = extract_to(move);
+  int flag = extract_flags(move);
   if (IS_PROMO(flag)) {
-    sprintf(buffer, "%s%s%c", SQ_TO_COORD[FLIP_63(src)],
-            SQ_TO_COORD[FLIP_63(dst)], PROMOTION_TO_CHAR[PROMO_PT(flag)]);
+    sprintf(buffer, "%s%s%c", SQ_TO_COORD[flip_63(src)],
+            SQ_TO_COORD[flip_63(dst)], PROMOTION_TO_CHAR[PROMO_PT(flag)]);
   } else {
-    sprintf(buffer, "%s%s", SQ_TO_COORD[FLIP_63(src)],
-            SQ_TO_COORD[FLIP_63(dst)]);
+    sprintf(buffer, "%s%s", SQ_TO_COORD[flip_63(src)],
+            SQ_TO_COORD[flip_63(dst)]);
   }
   return buffer;
 }
