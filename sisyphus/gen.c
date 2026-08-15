@@ -447,7 +447,7 @@ INLINE int gen_black_queen_attacks_against(ChessBoard *board, Move *moves,
                          board->occ[BOTH], BLACK);
 }
 
-INLINE int gen_black_king_attacks_agianst(ChessBoard *board, Move *moves,
+INLINE int gen_black_king_attacks_against(ChessBoard *board, Move *moves,
                                           bb mask) {
   return gen_king_moves(moves, board->bb_squares[BLACK_KING], mask, BLACK);
 }
@@ -456,7 +456,7 @@ INLINE int gen_black_attacks_against(ChessBoard *board, Move *moves, bb mask) {
   static const AttacksGen black_attack_generators[] = {
       gen_black_pawn_attacks_against,   gen_black_knight_attacks_against,
       gen_black_bishop_attacks_against, gen_black_rook_attacks_against,
-      gen_black_queen_attacks_against,  gen_black_king_attacks_agianst};
+      gen_black_queen_attacks_against,  gen_black_king_attacks_against};
 
   Move *ptr = moves;
   for (size_t i = 0; i < ARRAY_SIZE(black_attack_generators); i++) {
