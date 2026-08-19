@@ -1,3 +1,6 @@
 [submodule "sisyphus/C-Thread-Pool"]
 	path = sisyphus/C-Thread-Pool
 	url = https://github.com/salmiyounes/C-Thread-Pool
+[submodule "tools/lichess-bot"]
+	path = tools/lichess-bot
+	url = https://github.com/salmiyounes/lichess-bot
