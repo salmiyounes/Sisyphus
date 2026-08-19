@@ -4,4 +4,4 @@ import nox
 def tests(session):
     session.install("pytest")
     session.install("-e", ".")
-    session.run("pytest", "-vv") 
+    session.run("pytest", "-vv", "--ignore=tools/lichess-bot") 
