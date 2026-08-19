@@ -1,42 +1,31 @@
 #include "gen.h"
 
-// Helper functions
-INLINE void emit_move(Move **moves, enum Square from, enum Square to,
-                      enum ColoredPiece piece, int flag) {
-  *(*moves)++ = encode_move(from, to, piece, flag);
-}
+// Helper Macros
+#define emit_move_with_empty_flag(moves, from, to, piece)                      \
+  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
+            (enum ColoredPiece)(piece), EMPTY_FLAG)
 
-INLINE void emit_move_with_empty_flag(Move **moves, enum Square from,
-                                      enum Square to, enum ColoredPiece piece) {
-  emit_move(moves, from, to, piece, EMPTY_FLAG);
-}
+#define emit_move_with_color(moves, from, to, piece, color)                    \
+  emit_move_with_empty_flag(                                                   \
+      (moves), (from), (to),                                                   \
+      make_piece_type((enum PieceType)(piece), (enum Color)(color)))
 
-INLINE void emit_move_with_color(Move **moves, enum Square from, enum Square to,
-                                 enum PieceType piece, enum Color color) {
-  emit_move_with_empty_flag(moves, from, to, make_piece_type(piece, color));
-}
+#define emit_promotion(moves, from, to, piece, flag)                           \
+  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
+            (enum ColoredPiece)(piece), (int)(flag))
 
-INLINE void emit_promotion(Move **moves, enum Square from, enum Square to,
-                           enum ColoredPiece piece, int flag) {
-  emit_move(moves, from, to, piece, flag);
-}
-
-INLINE void emit_promotions(Move **moves, enum Square from, enum Square to,
-                            enum ColoredPiece piece) {
-  for (int flag = KNIGHT_PROMO_FLAG; flag <= QUEEN_PROMO_FLAG;
-       emit_promotion(moves, from, to, piece, flag), flag++) {
+#define emit_promotions(moves, from, to, piece)                                \
+  for (int flag = KNIGHT_PROMO_FLAG; flag <= QUEEN_PROMO_FLAG;                 \
+       emit_promotion((moves), (from), (to), (piece), flag), flag++) {         \
   }
-}
 
-INLINE void emit_en_passant(Move **moves, enum Square from, enum Square to,
-                            enum ColoredPiece piece) {
-  emit_move(moves, from, to, piece, ENP_FLAG);
-}
+#define emit_en_passant(moves, from, to, piece)                                \
+  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
+            (enum ColoredPiece)(piece), ENP_FLAG)
 
-INLINE void emit_castle(Move **moves, enum Square from, enum Square to,
-                        enum ColoredPiece piece) {
-  emit_move(moves, from, to, piece, CASTLE_FLAG);
-}
+#define emit_castle(moves, from, to, piece)                                    \
+  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
+            (enum ColoredPiece)(piece), CASTLE_FLAG)
 
 INLINE int gen_knight_moves(Move *moves, bb srcs, bb mask, enum Color color) {
   Move *ptr = moves;

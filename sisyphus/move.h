@@ -65,6 +65,11 @@ static INLINE int extract_flags(const Move move) {
   return (int)((move >> 16) & 0xf);
 }
 
+static INLINE void emit_move(Move **moves, enum Square from, enum Square to,
+                             enum ColoredPiece piece, int flag) {
+  *(*moves)++ = encode_move(from, to, piece, flag);
+}
+
 // Move scoring tables
 extern int History_Heuristic[COLOR_NB][SQUARE_NB][SQUARE_NB];
 extern Move KILLER_MOVES[COLOR_NB][SQUARE_NB];
