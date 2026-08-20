@@ -202,10 +202,10 @@ Use Sisyphus as library
     .. code-block:: shell
 
         # Run all tests
-        $ python3 tests.py
+        $ pytest 
 
         # Run tests with verbose output
-        $ python3 tests.py -v
+        $ pytest -v
 
 Play against Sisyphus!
 ----------------------
