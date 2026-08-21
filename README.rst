@@ -202,10 +202,7 @@ Use Sisyphus as library
     .. code-block:: shell
 
         # Run all tests
-        $ pytest 
-
-        # Run tests with verbose output
-        $ pytest -v
+        $ nox
 
 Play against Sisyphus!
 ----------------------
