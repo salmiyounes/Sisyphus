@@ -8,11 +8,21 @@
 
 // Debug print macro
 #if !defined(DEBUG_DISABLE_PRINT) || defined(DEBUG)
-#define err(str)                                                               \
-  fprintf(stderr, "%s, at %s, line %d\n", str, __FILE__, __LINE__);            \
+#define err(...)                                                               \
+  fprintf(stderr, "%s, at %s, line %d\n", __VA_ARGS__, __FILE__, __LINE__);    \
   fflush(stderr)
 #else
-#define err(str)
+#define err(...)
+#endif
+
+#if !defined(DEBUG_DISABLE_PRINT) || defined(DEBUG)
+#define die(...)                                                               \
+  do {                                                                         \
+    err(__VA_ARGS__);                                                          \
+    exit(ERROR_CODE);                                                          \
+  } while (0)
+#else
+#define die(...)
 #endif
 
 // Assertion macro
