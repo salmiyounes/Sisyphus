@@ -2,8 +2,6 @@
 #define BOARD_H
 
 #include "bb.h"
-#include "search.h"
-#include "thpool.h"
 #include "types.h"
 #include "zobrist.h"
 #include <stdbool.h>
@@ -68,10 +66,7 @@ int board_drawn_by_insufficient_material(
     ChessBoard *board);                  // Check material draw
 int is_draw(ChessBoard *board, int ply); // Check if position is drawn
 
-// Testing and threading
+// Testing
 bb perft_test(ChessBoard *board, int depth); // Performance test
-void thread_init(Search *search, ChessBoard *board, Move *result,
-                 float duration, bool debug); // Initialize search thread
-void thread_stop(Search *search);             // Stop search thread
 
 #endif // BOARD_H
