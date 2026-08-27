@@ -66,7 +66,4 @@ int board_drawn_by_insufficient_material(
     ChessBoard *board);                  // Check material draw
 int is_draw(ChessBoard *board, int ply); // Check if position is drawn
 
-// Testing
-bb perft_test(ChessBoard *board, int depth); // Performance test
-
 #endif // BOARD_H

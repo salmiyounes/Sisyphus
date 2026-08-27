@@ -9,7 +9,7 @@ Entry_t TABLE[SIZE] = {0};
 bb perft_test(ChessBoard *board, int depth) {
   Undo undo;
   Move moves[MAX_MOVES];
-  bb nodes = U64(0);
+  bb nodes = EMPTY_BB;
   int count = 0;
   depth = MAX(depth, 0);
 

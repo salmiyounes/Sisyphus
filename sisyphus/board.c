@@ -43,8 +43,8 @@ void board_clear(ChessBoard *board) {
   castling_rights[56] = CASTLE_BLACK_QUEEN_SIDE;
   castling_rights[63] = CASTLE_BLACK_KING_SIDE;
 
-  board->hash = U64(0);
-  board->pawn_hash = U64(0);
+  board->hash = EMPTY_BB;
+  board->pawn_hash = EMPTY_BB;
   board->mg[WHITE] = board->mg[BLACK] = 0;
   board->eg[WHITE] = board->eg[BLACK] = 0;
 }
@@ -108,8 +108,8 @@ void board_init(ChessBoard *board) {
     board_update(board, square(7, file), INITIAL_PIECES[BLACK][file]);
   }
 
-  board->hash = U64(0);
-  board->pawn_hash = U64(0);
+  board->hash = EMPTY_BB;
+  board->pawn_hash = EMPTY_BB;
   gen_curr_state_zobrist(board);
   gen_pawn_zobrist(board);
 }
@@ -278,8 +278,8 @@ void board_load_fen(ChessBoard *board, const char *fen) {
   }
 
   board->numMoves = 0;
-  board->hash = U64(0);
-  board->pawn_hash = U64(0);
+  board->hash = EMPTY_BB;
+  board->pawn_hash = EMPTY_BB;
   gen_curr_state_zobrist(board);
   gen_pawn_zobrist(board);
 

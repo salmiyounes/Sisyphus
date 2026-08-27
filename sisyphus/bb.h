@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 /* Macros */
+#define EMPTY_BB U64(0)
 #define BIT(sq) (U64(1) << (sq))
 
 #define POP_LSB(b, x)                                                          \
