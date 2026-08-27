@@ -18,8 +18,14 @@ ifeq ($(DEBUG_DISABLE_PRINT),1)
     CFLAGS += -DDEBUG_DISABLE_PRINT
 endif
 
-SRCS = utils.c zobrist.c  bb.c search.c board.c thread.c move.c gen.c table.c eval.c C-Thread-Pool/thpool.c
-HEADERS = types.h utils.h zobrist.h  bb.h  search.h board.h thread.h move.h gen.h table.h eval.h C-Thread-Pool/thpool.h
+ROOT_SRCS := $(wildcard *.c)  
+SUB_SRCS := C-Thread-Pool/thpool.c
+SRCS	:= $(ROOT_SRCS) $(SUB_SRCS)
+
+ROOT_HEADERS := $(wildcard *.h) 
+SUB_HEADERS := C-Thread-Pool/thpool.h
+HEADERS	:= $(ROOT_HEADERS) $(SUB_HEADERS)
+
 INCLUDES = -I. -I C-Thread-Pool
 
 OBJS = $(SRCS:.c=.o)
