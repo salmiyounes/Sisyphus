@@ -1,3 +1,5 @@
+#include <stddef.h>
+#include <sys/time.h>
 #include "utils.h"
 
 void swap_any(void *a, void *b, size_t s) {
@@ -30,3 +32,10 @@ bb xorshift64() {
   x ^= x >> 27;
   return x * U64(0x2545F4914F6CDD1D);
 }
+
+long gettimeinms() {
+  struct timeval time;
+  gettimeofday(&time, NULL); 
+  
+  return time.tv_sec * 1000 + time.tv_usec / 1000;
+} 

@@ -14,4 +14,7 @@ char *xstrdup(const char *src);
 // Random number generator using xorshift algorithm
 bb xorshift64();
 
+// Get the current time in milliseconds
+long gettimeinms();
+
 #endif
