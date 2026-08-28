@@ -6,6 +6,10 @@ Sisyphus
    :alt: https://github.com/salmiyounes/Sisyphus/actions/
    :target: CI
 
+.. image:: https://img.shields.io/github/license/salmiyounes/Sisyphus
+   :alt: License: MIT
+   :target: https://github.com/salmiyounes/Sisyphus/blob/master/LICENSE
+
 .. image:: https://lichess-shield.vercel.app/api?username=Sisyphus-engine&format=bullet
    :alt: Lichess bullet ranking
    :target: https://lichess.org
@@ -185,7 +189,21 @@ Use Sisyphus as library
         >>> board.fen
         'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -'
         >>>
-        >>> board = sisyphus.Board("rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1")
+        >>> board.set_fen("rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3 0 1")
+        >>> board.unicode()
+        8 ♖ ♘ ♗ ♕ ♔ ♗ ♘ ♖
+        7 ♙ ♙ ♙ . ♙ ♙ ♙ ♙
+        6 . . . . . . . .
+        5 . . . ♙ . . . .
+        4 . . . ♟ . . . .
+        3 . . . . . . . .
+        2 ♟ ♟ ♟ . ♟ ♟ ♟ ♟
+        1 ♜ ♞ ♝ ♛ ♚ ♝ ♞ ♜
+        a b c d e f g h
+
+
+        rnbqkbnr/ppp1pppp/8/3p4/3P4/8/PPP1PPPP/RNBQKBNR b KQkq d3
+        >>>
         >>> board.color_at(sisyphus.D1) # '0' for WHITE and '1' for BLACK
         0
 
@@ -214,7 +232,7 @@ License
 -------
 
 Sisyphus is under the MIT License.
-Check out ``LICENSE.txt`` for the full text.
+Check out ``LICENSE`` for the full text.
 
 Contributing
 -----------
