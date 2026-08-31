@@ -1666,8 +1666,8 @@ class Board:
         """
         return None
 
-    def pop_null(self) -> Move:
-        return NotImplemented
+    def pop_null(self) -> Move: 
+        return NotImplemented # type: ignore[no-any-return]
 
     def peek(self) -> Optional[Move]:
         return self._handle_moves.peek()
