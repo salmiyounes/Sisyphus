@@ -1,0 +1,20 @@
+name: Typing
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+    typing:
+        runs-on: ubuntu-latest
+        steps:
+        - uses: actions/checkout@v5
+        - uses: actions/setup-python@v5
+          with:
+            python-version: '3.12'
+        - run: pip install mypy
+        - run: python -m mypy --strict sisyphus
+        - run: pip install pyright
+        - run: python -m pyright sisyphus
