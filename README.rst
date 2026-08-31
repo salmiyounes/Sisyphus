@@ -6,6 +6,10 @@ Sisyphus
    :alt: https://github.com/salmiyounes/Sisyphus/actions/
    :target: CI
 
+.. image:: https://github.com/salmiyounes/Sisyphus/actions/workflows/typing.yaml/badge.svg
+   :alt: https://github.com/salmiyounes/Sisyphus/actions/
+   :target: Typing
+
 .. image:: https://img.shields.io/github/license/salmiyounes/Sisyphus
    :alt: License: MIT
    :target: https://github.com/salmiyounes/Sisyphus/blob/master/LICENSE
