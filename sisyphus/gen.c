@@ -180,21 +180,21 @@ INLINE int gen_white_king_castle(ChessBoard *board, Move *moves) {
   bb occ = board->occ[BOTH];
 
   if (board->castle & CASTLE_WHITE_KING_SIDE) {
-    bb mask = BIT(E1) | BIT(F1);
+    bb mask = BIT(F1) | BIT(G1);
     if (!(occ & mask)) {
-      if (!(is_square_attacked_by(board, D1, BLACK)) &&
-          !(is_square_attacked_by(board, E1, BLACK))) {
-        emit_castle(&moves, D1, F1, WHITE_KING);
+      if (!(is_square_attacked_by(board, E1, BLACK)) &&
+          !(is_square_attacked_by(board, F1, BLACK))) {
+        emit_castle(&moves, E1, G1, WHITE_KING);
       }
     }
   }
 
   if (board->castle & CASTLE_WHITE_QUEEN_SIDE) {
-    bb mask = BIT(A1) | BIT(B1) | BIT(C1);
+    bb mask = BIT(B1) | BIT(C1) | BIT(D1);
     if (!(occ & mask)) {
-      if (!(is_square_attacked_by(board, C1, BLACK)) &&
-          !(is_square_attacked_by(board, D1, BLACK))) {
-        emit_castle(&moves, D1, B1, WHITE_KING);
+      if (!(is_square_attacked_by(board, D1, BLACK)) &&
+          !(is_square_attacked_by(board, E1, BLACK))) {
+        emit_castle(&moves, E1, C1, WHITE_KING);
       }
     }
   }
@@ -359,21 +359,21 @@ INLINE int gen_black_king_castle(ChessBoard *board, Move *moves) {
   bb occ = board->occ[BOTH];
 
   if (board->castle & CASTLE_BLACK_KING_SIDE) {
-    bb mask = BIT(E8) | BIT(F8);
+    bb mask = BIT(F8) | BIT(G8);
     if (!(occ & mask)) {
-      if (!(is_square_attacked_by(board, D8, WHITE)) &&
-          !(is_square_attacked_by(board, E8, WHITE))) {
-        emit_castle(&moves, D8, F8, BLACK_KING);
+      if (!(is_square_attacked_by(board, E8, WHITE)) &&
+          !(is_square_attacked_by(board, F8, WHITE))) {
+        emit_castle(&moves, E8, G8, BLACK_KING);
       }
     }
   }
 
   if (board->castle & CASTLE_BLACK_QUEEN_SIDE) {
-    bb mask = BIT(A8) | BIT(B8) | BIT(C8);
+    bb mask = BIT(B8) | BIT(C8) | BIT(D8);
     if (!(occ & mask)) {
-      if (!(is_square_attacked_by(board, C8, WHITE)) &&
-          !(is_square_attacked_by(board, D8, WHITE))) {
-        emit_castle(&moves, D8, B8, BLACK_KING);
+      if (!(is_square_attacked_by(board, D8, WHITE)) &&
+          !(is_square_attacked_by(board, E8, WHITE))) {
+        emit_castle(&moves, E8, C8, BLACK_KING);
       }
     }
   }
