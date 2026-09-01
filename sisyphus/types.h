@@ -19,7 +19,7 @@
 #define die(...)                                                               \
   do {                                                                         \
     err(__VA_ARGS__);                                                          \
-    exit(ERROR_CODE);                                                          \
+    exit(1);                                                                   \
   } while (0)
 #else
 #define die(...)
@@ -124,7 +124,7 @@ typedef struct {
 } Entry_t;
 
 enum Square {
-  A1 = 1,
+  A1 = 0,
   B1,
   C1,
   D1,
