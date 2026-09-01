@@ -21,9 +21,9 @@ extern bb HASH_COLOR_SIDE;
 void init_zobrist();
 
 // Generate Zobrist hash for current board state
-void gen_curr_state_zobrist(ChessBoard *board);
+bb gen_curr_state_zobrist(ChessBoard *board);
 
 // Generate Zobrist hash for pawn structure
-void gen_pawn_zobrist(ChessBoard *board);
+bb gen_pawn_zobrist(ChessBoard *board);
 
 #endif

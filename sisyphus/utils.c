@@ -1,5 +1,6 @@
 #include "utils.h"
 #include <stddef.h>
+#include <stdio.h>
 #include <sys/time.h>
 
 void swap_any(void *a, void *b, size_t s) {
@@ -11,16 +12,12 @@ void swap_any(void *a, void *b, size_t s) {
 }
 
 char *xstrdup(const char *src) {
-  if (src == NULL)
-    return NULL;
-
-  size_t len = strlen(src) + 1;
-  void *new_s = malloc(len);
-
-  if (new_s == NULL)
-    return NULL;
-
-  return (char *)memcpy(new_s, src, len);
+  char *s2;
+  size_t len;
+  len = strlen(src);
+  if (!(s2 = malloc(len + 1)))
+    die("fatal error: out of memory");
+  return memcpy(s2, src, len + 1);
 }
 
 bb xorshift64() {
