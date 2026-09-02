@@ -8,6 +8,9 @@
 // Generic swap function for any data type
 void swap_any(void *a, void *b, size_t s);
 
+//
+void memset32(void *dest, uint16_t value, size_t count);
+
 // String duplication function
 char *xstrdup(const char *src);
 

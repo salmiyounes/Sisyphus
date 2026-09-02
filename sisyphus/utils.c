@@ -1,4 +1,5 @@
 #include "utils.h"
+#include <assert.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <sys/time.h>
@@ -9,6 +10,17 @@ void swap_any(void *a, void *b, size_t s) {
   memcpy(a, b, s);
   memcpy(b, temp, s);
   free(temp);
+}
+
+void memset32(void *dest, uint16_t value, size_t count) {
+  uint32_t *ptr = (uint32_t *)dest;
+  assert(sizeof(*ptr) == 4);
+
+  while (count > 0) {
+    *ptr = value;
+    ptr++;
+    count--;
+  }
 }
 
 char *xstrdup(const char *src) {
