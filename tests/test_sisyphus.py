@@ -1,6 +1,7 @@
 import logging
 import sys
 import unittest
+
 import sisyphus
 
 
@@ -221,7 +222,6 @@ class BoardTestCase(unittest.TestCase):
         board = sisyphus.Board("1q1k4/2Rr4/8/2Q3K1/8/8/8/8 w - - 0 1")
         self.assertEqual(board.castling_rights(), sisyphus.EMPTY_FLAG)
 
-
     def test_peek(self):
         board = sisyphus.Board()
         move = sisyphus.Move(
@@ -258,8 +258,12 @@ class BaseBoardTestCase(unittest.TestCase):
 
     def test_piece_at(self):
         board = sisyphus.BaseBoard()
-        self.assertEqual(board.piece_at(sisyphus.D1), sisyphus.PieceType.from_symbol("q"))
-        self.assertEqual(board.piece_at(sisyphus.F8), sisyphus.PieceType.from_symbol("B"))
+        self.assertEqual(
+            board.piece_at(sisyphus.D1), sisyphus.PieceType.from_symbol("q")
+        )
+        self.assertEqual(
+            board.piece_at(sisyphus.F8), sisyphus.PieceType.from_symbol("B")
+        )
         self.assertEqual(board.piece_at(sisyphus.D3), None)
 
         with self.assertRaises(IndexError):
@@ -315,7 +319,9 @@ class MoveTestCase(unittest.TestCase):
 
     def test_san(self):
         move = sisyphus.Move(
-            sisyphus.G1, sisyphus.F3, sisyphus.PieceType(sisyphus.KNIGHT, sisyphus.WHITE)
+            sisyphus.G1,
+            sisyphus.F3,
+            sisyphus.PieceType(sisyphus.KNIGHT, sisyphus.WHITE),
         )
         self.assertEqual(move.san, "g1f3")
 

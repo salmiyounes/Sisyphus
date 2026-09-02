@@ -21,36 +21,13 @@ __version__ = "0.1.0"
 
 __license__ = "MIT"
 
-import os
 import dataclasses
-from typing import (
-    Optional,
-    Callable,
-    Union,
-    List,
-    Tuple,
-    TypeAlias,
-    Iterator,
-    Self,
-    Any,
-)
-from ctypes import (
-    CDLL,
-    Structure,
-    POINTER,
-    pointer,
-    byref,
-    Array,
-    c_uint64,
-    c_uint32,
-    c_char,
-    c_char_p,
-    c_int,
-    c_bool,
-    c_void_p,
-    c_float,
-    create_string_buffer,
-)
+import os
+from ctypes import (CDLL, POINTER, Array, Structure, byref, c_bool, c_char,
+                    c_char_p, c_float, c_int, c_uint32, c_uint64, c_void_p,
+                    create_string_buffer, pointer)
+from typing import (Any, Callable, Iterator, List, Optional, Self, Tuple,
+                    TypeAlias, Union)
 
 # Starting possition fen
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
@@ -1666,8 +1643,8 @@ class Board:
         """
         return None
 
-    def pop_null(self) -> Move: 
-        return NotImplemented # type: ignore[no-any-return]
+    def pop_null(self) -> Move:
+        return NotImplemented  # type: ignore[no-any-return]
 
     def peek(self) -> Optional[Move]:
         return self._handle_moves.peek()
