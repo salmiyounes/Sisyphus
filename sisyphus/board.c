@@ -31,11 +31,12 @@ void init_table() {
 }
 
 void board_clear(ChessBoard *board) {
-  memset(board, 0, sizeof(ChessBoard));
+  if (board == NULL)
+    die("board_clear(): board is NULL");
 
-  for (int i = 0; i < SQUARE_NB; i++) {
-    board->squares[i] = NONE;
-  }
+  memset(board, 0, sizeof(ChessBoard));
+  memset32((void *)board->squares, NONE,
+           sizeof(board->squares) / sizeof(uint32_t));
 
   board->castle = CASTLE_ALL;
   castling_rights[0] = CASTLE_WHITE_QUEEN_SIDE;
