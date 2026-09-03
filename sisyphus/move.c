@@ -107,10 +107,8 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
     }
   }
 
-  if (board->castle) {
-    board->castle &= ~castling_rights[src];
-    board->castle &= ~castling_rights[dst];
-  }
+  // Update the castling rights
+  update_castling_rights(board, src, dst);
 
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
