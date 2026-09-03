@@ -1,8 +1,8 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include "types.h"
 #include <stdlib.h>
+#include <stdint.h>
 #include <string.h>
 
 // Generic swap function for any data type
@@ -15,7 +15,7 @@ void memset32(void *dest, uint16_t value, size_t count);
 char *xstrdup(const char *src);
 
 // Random number generator using xorshift algorithm
-bb xorshift64();
+uint64_t xorshift64();
 
 // Get the current time in milliseconds
 long gettimeinms();

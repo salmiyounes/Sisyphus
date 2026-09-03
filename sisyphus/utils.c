@@ -14,8 +14,6 @@ void swap_any(void *a, void *b, size_t s) {
 
 void memset32(void *dest, uint16_t value, size_t count) {
   uint32_t *ptr = (uint32_t *)dest;
-  assert(sizeof(*ptr) == 4);
-
   while (count > 0) {
     *ptr = value;
     ptr++;
@@ -28,18 +26,18 @@ char *xstrdup(const char *src) {
   size_t len;
   len = strlen(src);
   if (!(s2 = malloc(len + 1)))
-    die("fatal error: out of memory");
+    fprintf(stderr, "fatal error: out of memory");
   return memcpy(s2, src, len + 1);
 }
 
-bb xorshift64() {
+uint64_t xorshift64() {
   // https://en.wikipedia.org/wiki/Xorshift
   // https://vigna.di.unimi.it/ftp/papers/xorshift.pdf
-  static bb x = U64(1);
+  static uint64_t x = 1ULL;
   x ^= x >> 12;
   x ^= x << 25;
   x ^= x >> 27;
-  return x * U64(0x2545F4914F6CDD1D);
+  return x * 0x2545F4914F6CDD1DULL;
 }
 
 long gettimeinms() {
