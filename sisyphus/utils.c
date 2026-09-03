@@ -4,14 +4,6 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-void swap_any(void *a, void *b, size_t s) {
-  void *temp = malloc(s);
-  memcpy(temp, a, s);
-  memcpy(a, b, s);
-  memcpy(b, temp, s);
-  free(temp);
-}
-
 void memset32(void *dest, uint16_t value, size_t count) {
   uint32_t *ptr = (uint32_t *)dest;
   while (count > 0) {
