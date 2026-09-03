@@ -52,6 +52,12 @@ extern int castling_rights[64];
 #define MAX(A, B) ((A) > (B) ? (A) : (B))
 #define SWITCH_SIDE(x) (x->color ^= BLACK) // Switch side to move
 
+static INLINE void update_castling_rights(ChessBoard *board, enum Square src,
+                                          enum Square dst) {
+  if (board->castle)
+    board->castle &= ~(castling_rights[src] | castling_rights[dst]);
+}
+
 // Board manipulation functions
 void board_init(ChessBoard *b);  // Initialize chess board
 void print_board(ChessBoard *b); // Print board representation
