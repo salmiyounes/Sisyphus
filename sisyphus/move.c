@@ -57,13 +57,13 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
 
   board_update(board, src, NONE);
 
-  if (!IS_PROMO(flag)) {
+  if (!IS_PROMO(flag))
     board_update(board, dst, piece);
-  }
 
   board->ep = EMPTY_BB;
 
-  if (piece == WHITE_PAWN) {
+  switch (piece) {
+  case WHITE_PAWN: {
     bb bsrc = BIT(src);
     bb bdst = BIT(dst);
     if ((bsrc & RANK_2) && (bdst & RANK_4)) {
@@ -73,7 +73,9 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
       board_update(board, dst - 8, NONE);
     }
     HANDLE_PROMOTION(board, piece, flag, dst, color);
-  } else if (piece == BLACK_PAWN) {
+    break;
+  }
+  case BLACK_PAWN: {
     bb bsrc = BIT(src);
     bb bdst = BIT(dst);
     if ((bsrc & RANK_7) && (bdst & RANK_5)) {
@@ -83,30 +85,33 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
       board_update(board, dst + 8, NONE);
     }
     HANDLE_PROMOTION(board, piece, flag, dst, color);
-  } else if (piece == WHITE_KING) {
+    break;
+  }
+  case WHITE_KING:
     board->castle &= ~CASTLE_WHITE;
     if (IS_CAS(flag)) {
-      if (src == 4 && dst == 6) {
-        board_update(board, 7, NONE);
-        board_update(board, 5, WHITE_ROOK);
-      } else if (src == 4 && dst == 2) {
-        board_update(board, 0, NONE);
-        board_update(board, 3, WHITE_ROOK);
+      if (src == E1 && dst == G1) {
+        board_update(board, H1, NONE);
+        board_update(board, F1, WHITE_ROOK);
+      } else if (src == E1 && dst == C1) {
+        board_update(board, A1, NONE);
+        board_update(board, D1, WHITE_ROOK);
       }
     }
-  } else if (piece == BLACK_KING) {
+    break;
+  case BLACK_KING:
     board->castle &= ~CASTLE_BLACK;
     if (IS_CAS(flag)) {
-      if (src == 60 && dst == 62) {
-        board_update(board, 63, NONE);
-        board_update(board, 61, BLACK_ROOK);
-      } else if (src == 60 && dst == 58) {
-        board_update(board, 56, NONE);
-        board_update(board, 59, BLACK_ROOK);
+      if (src == E8 && dst == G8) {
+        board_update(board, H8, NONE);
+        board_update(board, F8, BLACK_ROOK);
+      } else if (src == E8 && dst == C8) {
+        board_update(board, A8, NONE);
+        board_update(board, D8, BLACK_ROOK);
       }
     }
+    break;
   }
-
   // Update the castling rights
   update_castling_rights(board, src, dst);
 
@@ -133,39 +138,41 @@ INLINE void undo_move(ChessBoard *board, Move move, Undo *undo) {
   board->castle = undo->castle;
 
   board_update(board, src, piece);
-
   board_update(board, dst, capture);
 
-  if (piece == WHITE_PAWN) {
+  switch (piece) {
+  case WHITE_PAWN:
     if (IS_ENP(flag)) {
       board_update(board, dst - 8, BLACK_PAWN);
     }
-  } else if (piece == BLACK_PAWN) {
+    break;
+  case BLACK_PAWN:
     if (IS_ENP(flag)) {
       board_update(board, dst + 8, WHITE_PAWN);
     }
-  }
-
-  else if (piece == WHITE_KING) {
+    break;
+  case WHITE_KING:
     if (IS_CAS(flag)) {
-      if (src == 4 && dst == 6) {
-        board_update(board, 7, WHITE_ROOK);
-        board_update(board, 5, NONE);
-      } else if (src == 4 && dst == 2) {
-        board_update(board, 0, WHITE_ROOK);
-        board_update(board, 3, NONE);
+      if (src == E1 && dst == G1) {
+        board_update(board, H1, WHITE_ROOK);
+        board_update(board, F1, NONE);
+      } else if (src == E1 && dst == C1) {
+        board_update(board, A1, WHITE_ROOK);
+        board_update(board, D1, NONE);
       }
     }
-  } else if (piece == BLACK_KING) {
+    break;
+  case BLACK_KING:
     if (IS_CAS(flag)) {
-      if (src == 60 && dst == 62) {
-        board_update(board, 63, BLACK_ROOK);
-        board_update(board, 61, NONE);
-      } else if (src == 60 && dst == 58) {
-        board_update(board, 56, BLACK_ROOK);
-        board_update(board, 59, NONE);
+      if (src == E8 && dst == G8) {
+        board_update(board, H8, BLACK_ROOK);
+        board_update(board, F8, NONE);
+      } else if (src == E8 && dst == C8) {
+        board_update(board, A8, BLACK_ROOK);
+        board_update(board, D8, NONE);
       }
     }
+    break;
   }
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
