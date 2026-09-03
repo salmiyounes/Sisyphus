@@ -88,8 +88,10 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
 }
 
 void board_init(ChessBoard *board) {
-  if (board == NULL)
+  if (board == NULL) {
+    err("board_init: board is NULL");
     return;
+  }
 
   board_clear(board);
   init_table();
@@ -102,9 +104,11 @@ void board_init(ChessBoard *board) {
        BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}};
 
   for (int file = 0; file < FILE_NB; file++) {
+    // initialize black and white pawn pieces
     board_update(board, square(1, file), WHITE_PAWN);
     board_update(board, square(6, file), BLACK_PAWN);
 
+    // initialize the rest
     board_update(board, square(0, file), INITIAL_PIECES[WHITE][file]);
     board_update(board, square(7, file), INITIAL_PIECES[BLACK][file]);
   }
