@@ -31,11 +31,6 @@
 #define IS_CAS(flag) ((flag) == CASTLE_FLAG)   // Check if castling
 
 // Board update macros
-#define HANDLE_PROMOTION(board, piece, flag, dst, color)                       \
-  if (IS_PROMO(flag)) {                                                        \
-    board_update(board, dst, make_piece_type(PROMO_PT(flag), color));          \
-  }
-
 #define TOGGLE_HASH(board)                                                     \
   if (board->castle)                                                           \
     board->hash ^= HASH_CASTLE[board->castle];                                 \
