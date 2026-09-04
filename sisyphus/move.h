@@ -42,6 +42,9 @@
   if (board->ep)                                                               \
     board->hash ^= HASH_EP[file_of(get_lsb(board->ep))];
 
+#define place_promo_piece(board, dst, flag, color)                             \
+  board_update((board), (dst), make_piece_type(PROMO_PT(flag), (color)))
+
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)
 static INLINE Move encode_move(enum Square from, enum Square to,
@@ -68,6 +71,112 @@ static INLINE int extract_flags(const Move move) {
 static INLINE void emit_move(Move **moves, enum Square from, enum Square to,
                              enum ColoredPiece piece, int flag) {
   *(*moves)++ = encode_move(from, to, piece, flag);
+}
+
+// Helper functions for special moves
+
+static INLINE void handle_white_pawn(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag,
+                                     enum Color color) {
+  bb bsrc = BIT(src);
+  bb bdst = BIT(dst);
+  if ((bsrc & RANK_2) && (bdst & RANK_4))
+    board->ep = BIT(src + 8);
+
+  if (IS_ENP(flag))
+    board_update(board, dst - 8, NONE);
+
+  if (IS_PROMO(flag))
+    place_promo_piece(board, dst, flag, color);
+}
+
+static INLINE void unmake_white_pawn(ChessBoard *board, enum Square dst,
+                                     const int flag) {
+  if (!IS_ENP(flag))
+    return;
+  board_update(board, dst - 8, BLACK_PAWN);
+}
+
+static INLINE void handle_black_pawn(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag,
+                                     enum Color color) {
+  bb bsrc = BIT(src);
+  bb bdst = BIT(dst);
+  if ((bsrc & RANK_7) && (bdst & RANK_5))
+    board->ep = BIT(src - 8);
+
+  if (IS_ENP(flag))
+    board_update(board, dst + 8, NONE);
+
+  if (IS_PROMO(flag))
+    place_promo_piece(board, dst, flag, color);
+}
+
+static INLINE void unmake_black_pawn(ChessBoard *board, enum Square dst,
+                                     const int flag) {
+  if (!IS_ENP(flag))
+    return;
+  board_update(board, dst + 8, WHITE_PAWN);
+}
+
+static INLINE void handle_white_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
+  board->castle &= ~CASTLE_WHITE;
+
+  if (!IS_CAS(flag))
+    return;
+
+  if (src == E1 && dst == G1) {
+    board_update(board, H1, NONE);
+    board_update(board, F1, WHITE_ROOK);
+  } else if (src == E1 && dst == C1) {
+    board_update(board, A1, NONE);
+    board_update(board, D1, WHITE_ROOK);
+  }
+}
+
+static INLINE void unmake_white_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
+  if (!IS_CAS(flag))
+    return;
+
+  if (src == E1 && dst == G1) {
+    board_update(board, H1, WHITE_ROOK);
+    board_update(board, F1, NONE);
+  } else if (src == E1 && dst == C1) {
+    board_update(board, A1, WHITE_ROOK);
+    board_update(board, D1, NONE);
+  }
+}
+
+static INLINE void handle_black_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
+  board->castle &= ~CASTLE_BLACK;
+
+  if (!IS_CAS(flag))
+    return;
+
+  if (src == E8 && dst == G8) {
+    board_update(board, H8, NONE);
+    board_update(board, F8, BLACK_ROOK);
+  } else if (src == E8 && dst == C8) {
+    board_update(board, A8, NONE);
+    board_update(board, D8, BLACK_ROOK);
+  }
+}
+
+static INLINE void unmake_black_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
+  if (!IS_CAS(flag))
+    return;
+
+  if (src == E8 && dst == G8) {
+    board_update(board, H8, BLACK_ROOK);
+    board_update(board, F8, NONE);
+  } else if (src == E8 && dst == C8) {
+    board_update(board, A8, BLACK_ROOK);
+    board_update(board, D8, NONE);
+  }
 }
 
 // Move scoring tables
