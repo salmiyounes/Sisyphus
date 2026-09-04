@@ -35,7 +35,7 @@ bool is_tactical_move(ChessBoard *board, const Move move) {
   return is_capture(board, move) || IS_ENP(flag) || IS_PROMO(flag);
 }
 
-INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
+void do_move(ChessBoard *board, Move move, Undo *undo) {
   int src = extract_from(move);
   int dst = extract_to(move);
   int piece = extract_piece(move);
@@ -64,54 +64,21 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
 
   switch (piece) {
   case WHITE_PAWN: {
-    bb bsrc = BIT(src);
-    bb bdst = BIT(dst);
-    if ((bsrc & RANK_2) && (bdst & RANK_4)) {
-      board->ep = BIT(src + 8);
-    }
-    if (IS_ENP(flag)) {
-      board_update(board, dst - 8, NONE);
-    }
-    HANDLE_PROMOTION(board, piece, flag, dst, color);
+    handle_white_pawn(board, src, dst, flag, color);
     break;
   }
   case BLACK_PAWN: {
-    bb bsrc = BIT(src);
-    bb bdst = BIT(dst);
-    if ((bsrc & RANK_7) && (bdst & RANK_5)) {
-      board->ep = BIT(src - 8);
-    }
-    if (IS_ENP(flag)) {
-      board_update(board, dst + 8, NONE);
-    }
-    HANDLE_PROMOTION(board, piece, flag, dst, color);
+    handle_black_pawn(board, src, dst, flag, color);
     break;
   }
   case WHITE_KING:
-    board->castle &= ~CASTLE_WHITE;
-    if (IS_CAS(flag)) {
-      if (src == E1 && dst == G1) {
-        board_update(board, H1, NONE);
-        board_update(board, F1, WHITE_ROOK);
-      } else if (src == E1 && dst == C1) {
-        board_update(board, A1, NONE);
-        board_update(board, D1, WHITE_ROOK);
-      }
-    }
+    handle_white_king(board, src, dst, flag);
     break;
   case BLACK_KING:
-    board->castle &= ~CASTLE_BLACK;
-    if (IS_CAS(flag)) {
-      if (src == E8 && dst == G8) {
-        board_update(board, H8, NONE);
-        board_update(board, F8, BLACK_ROOK);
-      } else if (src == E8 && dst == C8) {
-        board_update(board, A8, NONE);
-        board_update(board, D8, BLACK_ROOK);
-      }
-    }
+    handle_black_king(board, src, dst, flag);
     break;
   }
+
   // Update the castling rights
   update_castling_rights(board, src, dst);
 
@@ -120,7 +87,7 @@ INLINE void do_move(ChessBoard *board, Move move, Undo *undo) {
   TOGGLE_HASH(board);
 }
 
-INLINE void undo_move(ChessBoard *board, Move move, Undo *undo) {
+void undo_move(ChessBoard *board, Move move, Undo *undo) {
   int piece = extract_piece(move);
   int src = extract_from(move);
   int dst = extract_to(move);
@@ -142,38 +109,19 @@ INLINE void undo_move(ChessBoard *board, Move move, Undo *undo) {
 
   switch (piece) {
   case WHITE_PAWN:
-    if (IS_ENP(flag)) {
-      board_update(board, dst - 8, BLACK_PAWN);
-    }
+    unmake_white_pawn(board, dst, flag);
     break;
   case BLACK_PAWN:
-    if (IS_ENP(flag)) {
-      board_update(board, dst + 8, WHITE_PAWN);
-    }
+    unmake_black_pawn(board, dst, flag);
     break;
   case WHITE_KING:
-    if (IS_CAS(flag)) {
-      if (src == E1 && dst == G1) {
-        board_update(board, H1, WHITE_ROOK);
-        board_update(board, F1, NONE);
-      } else if (src == E1 && dst == C1) {
-        board_update(board, A1, WHITE_ROOK);
-        board_update(board, D1, NONE);
-      }
-    }
+    unmake_white_king(board, src, dst, flag);
     break;
   case BLACK_KING:
-    if (IS_CAS(flag)) {
-      if (src == E8 && dst == G8) {
-        board_update(board, H8, BLACK_ROOK);
-        board_update(board, F8, NONE);
-      } else if (src == E8 && dst == C8) {
-        board_update(board, A8, BLACK_ROOK);
-        board_update(board, D8, NONE);
-      }
-    }
+    unmake_black_king(board, src, dst, flag);
     break;
   }
+
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
   TOGGLE_HASH(board);
