@@ -50,40 +50,84 @@ void board_clear(ChessBoard *board) {
   board->eg[WHITE] = board->eg[BLACK] = 0;
 }
 
+INLINE void board_remove(ChessBoard *board, enum Square sq,
+                         enum ColoredPiece prev) {
+  CLEAR_BIT(board->occ[BOTH], sq);
+  CLEAR_BIT(board->bb_squares[prev], sq);
+  if (piece_color(prev))
+    CLEAR_BIT(board->occ[BLACK], sq);
+  else
+    CLEAR_BIT(board->occ[WHITE], sq);
+
+  board->hash ^= HASH_PIECES[prev][sq];
+  board->mg[piece_color(prev)] -= mg_table[prev][sq];
+  board->eg[piece_color(prev)] -= eg_table[prev][sq];
+  board->gamePhase -= gamephaseInc[prev];
+}
+
+INLINE void board_set(ChessBoard *board, enum Square sq,
+                      enum ColoredPiece piece) {
+  SET_BIT(board->occ[BOTH], sq);
+  SET_BIT(board->bb_squares[piece], sq);
+  if (piece_color(piece))
+    SET_BIT(board->occ[BLACK], sq);
+  else
+    SET_BIT(board->occ[WHITE], sq);
+
+  board->hash ^= HASH_PIECES[piece][sq];
+  board->mg[piece_color(piece)] += mg_table[piece][sq];
+  board->eg[piece_color(piece)] += eg_table[piece][sq];
+  board->gamePhase += gamephaseInc[piece];
+}
+
 INLINE void board_update(ChessBoard *board, enum Square sq,
                          enum ColoredPiece piece) {
   ASSERT(piece >= WHITE_PAWN && piece <= NONE);
   ASSERT(sq >= 0 && sq < SQUARE_NB);
 
-  int prev = board->squares[sq];
+  enum ColoredPiece prev = board->squares[sq];
   board->squares[sq] = piece;
 
-  if (prev != NONE) {
-    CLEAR_BIT(board->occ[BOTH], sq);
-    CLEAR_BIT(board->bb_squares[prev], sq);
-    if (piece_color(prev)) {
-      CLEAR_BIT(board->occ[BLACK], sq);
-    } else {
-      CLEAR_BIT(board->occ[WHITE], sq);
-    }
-    board->hash ^= HASH_PIECES[prev][sq];
-    board->mg[piece_color(prev)] -= mg_table[prev][sq];
-    board->eg[piece_color(prev)] -= eg_table[prev][sq];
-    board->gamePhase -= gamephaseInc[prev];
+  switch (prev) {
+  case WHITE_PAWN:
+  case BLACK_PAWN:
+  case WHITE_KNIGHT:
+  case BLACK_KNIGHT:
+  case WHITE_BISHOP:
+  case BLACK_BISHOP:
+  case WHITE_ROOK:
+  case BLACK_ROOK:
+  case WHITE_QUEEN:
+  case BLACK_QUEEN:
+  case WHITE_KING:
+  case BLACK_KING:
+    board_remove(board, sq, prev);
+    break;
+  case NONE:
+    break;
+  default:
+    __builtin_unreachable();
   }
 
-  if (piece != NONE) {
-    SET_BIT(board->occ[BOTH], sq);
-    SET_BIT(board->bb_squares[piece], sq);
-    if (piece_color(piece)) {
-      SET_BIT(board->occ[BLACK], sq);
-    } else {
-      SET_BIT(board->occ[WHITE], sq);
-    }
-    board->hash ^= HASH_PIECES[piece][sq];
-    board->mg[piece_color(piece)] += mg_table[piece][sq];
-    board->eg[piece_color(piece)] += eg_table[piece][sq];
-    board->gamePhase += gamephaseInc[piece];
+  switch (piece) {
+  case WHITE_PAWN:
+  case BLACK_PAWN:
+  case WHITE_KNIGHT:
+  case BLACK_KNIGHT:
+  case WHITE_BISHOP:
+  case BLACK_BISHOP:
+  case WHITE_ROOK:
+  case BLACK_ROOK:
+  case WHITE_QUEEN:
+  case BLACK_QUEEN:
+  case WHITE_KING:
+  case BLACK_KING:
+    board_set(board, sq, piece);
+    break;
+  case NONE:
+    break;
+  default:
+    __builtin_unreachable();
   }
 }
 
