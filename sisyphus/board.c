@@ -18,6 +18,12 @@ static const char *PIECE_SYMBOLS[13] = {
 
 const char *PIECE_LABEL[COLOR_NB] = {"PNBRQK", "pnbrqk"};
 
+static const int INITIAL_PIECES[COLOR_NB][FILE_NB] = {
+    {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING,
+     WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK},
+    {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING,
+     BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}};
+
 void init_table() {
   int pc, p, sq;
   for (p = PAWN, pc = WHITE_PAWN; p <= KING; pc += 2, p++) {
@@ -35,8 +41,7 @@ void board_clear(ChessBoard *board) {
     die("board_clear(): board is NULL");
 
   memset(board, 0, sizeof(ChessBoard));
-  memset32((void *)board->squares, NONE,
-           sizeof(board->squares) / sizeof(uint32_t));
+  memset32((void *)board->squares, NONE, SQUARE_NB);
 
   board->castle = CASTLE_ALL;
   castling_rights[0] = CASTLE_WHITE_QUEEN_SIDE;
@@ -140,12 +145,6 @@ void board_init(ChessBoard *board) {
   board_clear(board);
   init_table();
   init_zobrist();
-
-  static const int INITIAL_PIECES[COLOR_NB][FILE_NB] = {
-      {WHITE_ROOK, WHITE_KNIGHT, WHITE_BISHOP, WHITE_QUEEN, WHITE_KING,
-       WHITE_BISHOP, WHITE_KNIGHT, WHITE_ROOK},
-      {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING,
-       BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}};
 
   for (int file = 0; file < FILE_NB; file++) {
     // initialize black and white pawn pieces
