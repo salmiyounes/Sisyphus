@@ -41,7 +41,7 @@ void board_clear(ChessBoard *board) {
     die("board_clear(): board is NULL");
 
   memset(board, 0, sizeof(ChessBoard));
-  memset32((void *)board->squares, NONE, SQUARE_NB);
+  memset32(board->squares, NONE, SQUARE_NB);
 
   board->castle = CASTLE_ALL;
   castling_rights[0] = CASTLE_WHITE_QUEEN_SIDE;

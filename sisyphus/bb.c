@@ -386,7 +386,7 @@ void bb_print(bb bbit) {
     for (int f = 0; f < FILE_NB; f++) {
       printf(" %c", (test_bit(bbit, square(r, f))) ? '1' : '.');
     }
-    printf("\n");
+    putc('\n', stdout);
   }
-  printf("\n");
+  putc('\n', stdout);
 }
