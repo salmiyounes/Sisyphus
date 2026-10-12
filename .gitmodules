@@ -4,3 +4,6 @@
 [submodule "tools/lichess-bot"]
 	path = tools/lichess-bot
 	url = https://github.com/salmiyounes/lichess-bot
+[submodule "tools/cutechess"]
+	path = tools/cutechess
+	url = https://github.com/salmiyounes/cutechess
