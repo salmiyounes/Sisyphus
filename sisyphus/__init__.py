@@ -23,11 +23,35 @@ __license__ = "MIT"
 
 import dataclasses
 import os
-from ctypes import (CDLL, POINTER, Array, Structure, byref, c_bool, c_char,
-                    c_char_p, c_float, c_int, c_uint32, c_uint64, c_void_p,
-                    create_string_buffer, pointer)
-from typing import (Any, Callable, Iterator, List, Optional, Self, Tuple,
-                    TypeAlias, Union)
+from ctypes import (
+    CDLL,
+    POINTER,
+    Array,
+    Structure,
+    byref,
+    c_bool,
+    c_char,
+    c_char_p,
+    c_float,
+    c_int,
+    c_uint32,
+    c_uint64,
+    c_void_p,
+    create_string_buffer,
+    pointer,
+)
+from typing import (
+    Any,
+    Callable,
+    Iterator,
+    List,
+    Optional,
+    Self,
+    Tuple,
+    TypeAlias,
+    Union,
+    cast,
+)
 
 # Starting possition fen
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
@@ -114,6 +138,7 @@ Color: TypeAlias = int
 WHITE: Color = 0
 BLACK: Color = 1
 BOTH: Color = 2
+COLORS: List[Color] = [WHITE, BLACK]
 
 # Flags
 Flags: TypeAlias = int
@@ -212,7 +237,7 @@ chess_lib.get_msb.restype = c_int
 chess_lib.popcount.argtypes = [c_uint64]
 chess_lib.popcount.restype = c_int
 chess_lib.several.argtypes = [c_uint64]
-chess_lib.several.restype = c_int
+chess_lib.several.restype = c_bool
 chess_lib.test_bit.argtypes = [c_uint64, c_int]
 chess_lib.test_bit.restype = c_bool
 chess_lib.square.argtypes = [c_int, c_int]
@@ -243,8 +268,8 @@ chess_lib.perft_test.argtypes = [POINTER(ChessBoard), c_int]
 chess_lib.perft_test.restype = c_uint64
 chess_lib.board_clear.argtypes = [POINTER(ChessBoard)]
 chess_lib.board_clear.restype = c_void_p
-chess_lib.board_drawn_by_insufficient_material.argtypes = [POINTER(ChessBoard)]
-chess_lib.board_drawn_by_insufficient_material.restype = c_int
+chess_lib.board_drawn_by_insufficient_material.argtypes = [POINTER(ChessBoard), c_int]
+chess_lib.board_drawn_by_insufficient_material.restype = c_bool
 
 # Move Generation functions
 chess_lib.gen_black_attacks_against.argtypes = [
@@ -1254,7 +1279,10 @@ class BaseBoard:
         return arr
 
     def drawn_by_insufficient_material(self) -> bool:
-        return bool(chess_lib.board_drawn_by_insufficient_material(self.ptr))
+        return all(
+            cast(int, chess_lib.board_drawn_by_insufficient_material(self.ptr, color))
+            for color in COLORS
+        )
 
     def unicode_print(self) -> None:
         chess_lib.print_board(self.ptr)
@@ -1397,7 +1425,6 @@ class Board:
         self.set_fen(fen=STARTING_FEN)
 
     def castling_rights(self) -> int:
-
         return self.board.castling_rights()
 
     def _generate_moves(self, func_name: str) -> Iterator[Move]:
