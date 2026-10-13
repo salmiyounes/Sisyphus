@@ -38,7 +38,7 @@ int get_msb(bb bbit);
 int popcount(bb bbit);
 
 // Checks if bitboard has more than one bit set
-int several(bb bbit);
+bool several(bb bbit);
 
 // Tests if specific square is set in bitboard
 bool test_bit(bb bbit, const enum Square sq);

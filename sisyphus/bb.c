@@ -82,12 +82,12 @@ int get_lsb(bb bbit) {
 
 int get_msb(bb bbit) {
   assert(bbit);
-  return __builtin_ctzll(bbit) ^ 63;
+  return __builtin_clzll(bbit) ^ 63;
 }
 
 int popcount(bb bbit) { return __builtin_popcountll(bbit); }
 
-int several(bb bbit) { return bbit & (bbit - 1); }
+bool several(bb bbit) { return bbit & (bbit - 1); }
 
 bool test_bit(bb bbit, const enum Square sq) {
   assert(sq >= 0 && sq < SQUARE_NB);
