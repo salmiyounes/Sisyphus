@@ -68,8 +68,8 @@ void board_update(ChessBoard *board, enum Square sq,
                   enum ColoredPiece piece); // Update board state
 
 // Game state evaluation
-int board_drawn_by_insufficient_material(
-    ChessBoard *board);                  // Check material draw
-int is_draw(ChessBoard *board, int ply); // Check if position is drawn
+bool board_drawn_by_insufficient_material(
+    ChessBoard *board, enum Color color); // Check material draw
+int is_draw(ChessBoard *board, int ply);  // Check if position is drawn
 
 #endif // BOARD_H

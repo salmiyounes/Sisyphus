@@ -7,6 +7,9 @@
 #include <ctype.h>
 #include <string.h>
 
+#define BB_LIGHT_SQUARES U64(0x55aa55aa55aa55aa)
+#define BB_DARK_SQUARES U64(0xaa55aa55aa55aa55)
+
 static const char *PIECE_SYMBOLS[13] = {
     [WHITE_PAWN] = "♟ ", [WHITE_KNIGHT] = "♞ ", [WHITE_BISHOP] = "♝ ",
     [WHITE_ROOK] = "♜ ", [WHITE_QUEEN] = "♛ ",  [WHITE_KING] = "♚ ",
@@ -189,23 +192,36 @@ int board_drawn_by_repetition(ChessBoard *board, int ply) {
   return 0;
 }
 
-int board_drawn_by_insufficient_material(ChessBoard *board) {
-  return !(board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN] |
-           board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK] |
-           board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN]) &&
-         (!several(board->occ[WHITE]) || !several(board->occ[BLACK])) &&
-         (!several(board->bb_squares[WHITE_KNIGHT] |
-                   board->bb_squares[BLACK_KNIGHT] |
-                   board->bb_squares[WHITE_BISHOP] |
-                   board->bb_squares[BLACK_BISHOP]) ||
-          (!(board->bb_squares[WHITE_BISHOP] |
-             board->bb_squares[BLACK_BISHOP]) &&
-           popcount(board->bb_squares[WHITE_KNIGHT] |
-                    board->bb_squares[BLACK_KNIGHT]) <= 2));
+bool board_drawn_by_insufficient_material(ChessBoard *board, enum Color color) {
+  bb pawns = board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN];
+  bb knights =
+      board->bb_squares[WHITE_KNIGHT] | board->bb_squares[BLACK_KNIGHT];
+  bb bishops =
+      board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];
+  bb rooks = board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK];
+  bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
+  bb kings = board->bb_squares[WHITE_KING] | board->bb_squares[BLACK_KING];
+  bb occ = board->occ[color];
+  bb other = board->occ[!color];
+
+  if (occ & (pawns | rooks | queens))
+    return false;
+
+  if (occ & knights)
+    return ((popcount(occ) <= 2) && !(other & ~queens & ~kings));
+
+  if (occ & bishops) {
+    bool same_color =
+        !(bishops & BB_DARK_SQUARES) || !(bishops & BB_LIGHT_SQUARES);
+    return (same_color && !pawns && !knights);
+  }
+
+  return true;
 }
 
 int is_draw(ChessBoard *board, int ply) {
-  return board_drawn_by_insufficient_material(board) ||
+  return (board_drawn_by_insufficient_material(board, WHITE) &&
+          board_drawn_by_insufficient_material(board, BLACK)) ||
          board_drawn_by_repetition(board, ply);
 }
 
