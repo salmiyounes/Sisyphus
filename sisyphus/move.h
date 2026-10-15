@@ -5,7 +5,6 @@
 #include "board.h"
 #include "gen.h"
 #include "zobrist.h"
-#include <assert.h>
 #include <stdbool.h>
 
 // Constants

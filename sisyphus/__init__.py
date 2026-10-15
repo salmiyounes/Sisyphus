@@ -59,6 +59,8 @@ STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
 _bb_initialized = False
 
 BitBoard: TypeAlias = int
+BB_EMPTY: BitBoard = 0
+BB_ALL: BitBoard = 0xFFFF_FFFF_FFFF_FFFF
 
 Square: TypeAlias = int
 SQUARE_NB: Square = 64
@@ -943,9 +945,10 @@ class SquareSet:
         return bool(self.mask)
 
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, SquareSet):
+        try:
+            return self.mask == SquareSet(other).mask  # type: ignore
+        except (TypeError, ValueError):
             return NotImplemented
-        return self.mask == other.mask
 
     def __contains__(self, sq: Square) -> bool:
         return bool(utils.bit(sq) & int(self))

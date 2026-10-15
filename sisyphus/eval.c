@@ -1,4 +1,5 @@
 #include "eval.h"
+#include "bb.h"
 
 int eval(ChessBoard *board) { return pesto_eval(board); }
 

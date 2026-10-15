@@ -219,7 +219,7 @@ bool board_drawn_by_insufficient_material(ChessBoard *board, enum Color color) {
   return true;
 }
 
-int is_draw(ChessBoard *board, int ply) {
+bool is_draw(ChessBoard *board, int ply) {
   return (board_drawn_by_insufficient_material(board, WHITE) &&
           board_drawn_by_insufficient_material(board, BLACK)) ||
          board_drawn_by_repetition(board, ply);

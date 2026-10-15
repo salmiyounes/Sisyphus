@@ -196,6 +196,19 @@ class BoardTestCase(unittest.TestCase):
         self.assertNotIn(sisyphus.D4, attackers)
         self.assertNotIn(sisyphus.E1, attackers)
 
+    def test_en_passant_attackers(self):
+        board = sisyphus.Board("4k3/8/8/8/4pPp1/8/8/4K3 b - f3 0 1")
+
+        # Attacking the en passant square.
+        attackers = board.attackers(sisyphus.BLACK, sisyphus.F3)
+        self.assertEqual(len(attackers), 2)
+        self.assertIn(sisyphus.E4, attackers)
+        self.assertIn(sisyphus.G4, attackers)
+
+        # Not attacking the pawn directly.
+        attackers = board.attackers(sisyphus.BLACK, sisyphus.F4)
+        self.assertEqual(attackers, sisyphus.BB_EMPTY)
+
     def test_check(self):
         board = sisyphus.Board(
             "rnbqkbnr/ppp2ppp/3p4/1B2Q3/8/8/PPPPPPPP/RN2KBNR b KQkq - 0 1"

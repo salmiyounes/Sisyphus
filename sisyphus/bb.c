@@ -1,4 +1,22 @@
 #include "bb.h"
+#include <stdio.h>
+
+extern int get_lsb(bb bbit);
+extern int get_msb(bb bbit);
+extern int popcount(bb bbit);
+extern bool several(bb bbit);
+extern bool test_bit(bb bbit, const enum Square sq);
+extern enum Color piece_color(enum ColoredPiece piece);
+extern enum PieceType piece_type(enum ColoredPiece piece);
+extern enum Square flip(enum Square square);
+extern enum Square flip_63(enum Square square);
+extern int file_of(enum Square sq);
+extern int rank_of(enum Square sq);
+extern int square(int rank, int file);
+extern int make_piece_type(enum PieceType pc, enum Color color);
+extern bb bb_bishop(enum Square sq, bb obs);
+extern bb bb_rook(enum Square sq, bb obs);
+extern bb bb_queen(enum Square sq, bb obs);
 
 bb BB_PAWNS[2][64];
 bb BB_KNIGHT[64];
@@ -72,61 +90,6 @@ int OFFSET_ROOK[64];
 
 bb ATTACK_BISHOP[5248];
 bb ATTACK_ROOK[102400];
-
-int get_lsb(bb bbit) {
-  // https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html#index-_005f_005fbuiltin_005fclz
-  // If bbit is 0, the result is undefined
-  assert(bbit);
-  return __builtin_ctzll(bbit);
-}
-
-int get_msb(bb bbit) {
-  assert(bbit);
-  return __builtin_clzll(bbit) ^ 63;
-}
-
-int popcount(bb bbit) { return __builtin_popcountll(bbit); }
-
-bool several(bb bbit) { return bbit & (bbit - 1); }
-
-bool test_bit(bb bbit, const enum Square sq) {
-  assert(sq >= 0 && sq < SQUARE_NB);
-  return (bool)(bbit & BIT(sq));
-}
-
-enum Color piece_color(enum ColoredPiece piece) {
-  return (enum Color)(piece & 1);
-}
-
-enum PieceType piece_type(enum ColoredPiece piece) {
-  return (enum PieceType)((piece & ~1) >> 1);
-}
-
-enum Square flip(enum Square square) { return (enum Square)(square ^ 56); }
-
-enum Square flip_63(enum Square square) { return (enum Square)(square ^ 63); }
-
-int square(int rank, int file) {
-  assert(0 <= rank && rank < RANK_NB);
-  assert(0 <= file && file < FILE_NB);
-  return rank * FILE_NB + file;
-}
-
-int file_of(enum Square sq) {
-  assert(0 <= sq && sq < SQUARE_NB);
-  return sq % FILE_NB;
-}
-
-int rank_of(enum Square sq) {
-  assert(0 <= sq && sq < SQUARE_NB);
-  return sq / RANK_NB;
-}
-
-int make_piece_type(enum PieceType pc, enum Color color) {
-  assert(color == WHITE || color == BLACK);
-  assert(pc >= PAWN && pc <= KING);
-  return (pc << 1) + color;
-}
 
 bool is_square_attacked_by(ChessBoard *board, enum Square square,
                            enum Color color) {
@@ -363,22 +326,6 @@ void bb_init() {
       BB_KING[square(rank, file)] = value;
     }
   }
-}
-
-bb bb_bishop(enum Square sq, bb obs) {
-  bb value = obs & BB_BISHOP[sq];
-  int index = (value * MAGIC_BISHOP[sq]) >> SHIFT_BISHOP[sq];
-  return ATTACK_BISHOP[index + OFFSET_BISHOP[sq]];
-}
-
-bb bb_rook(enum Square sq, bb obs) {
-  bb value = obs & BB_ROOK[sq];
-  int index = (value * MAGIC_ROOK[sq]) >> SHIFT_ROOK[sq];
-  return ATTACK_ROOK[index + OFFSET_ROOK[sq]];
-}
-
-bb bb_queen(enum Square sq, bb obs) {
-  return bb_bishop(sq, obs) | bb_rook(sq, obs);
 }
 
 void bb_print(bb bbit) {

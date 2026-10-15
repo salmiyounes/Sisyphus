@@ -1,5 +1,6 @@
 #include "search.h"
-#include "utils.h"
+#include <stdio.h>
+#include <string.h>
 
 #define FullDepthMoves 5
 #define ReductionLimit 3

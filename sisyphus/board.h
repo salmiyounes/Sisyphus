@@ -1,11 +1,8 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include "bb.h"
 #include "types.h"
-#include "zobrist.h"
 #include <stdbool.h>
-#include <stdio.h>
 
 // Piece square tables for positional evaluation
 extern const int pawn_square_values[64];
@@ -70,6 +67,6 @@ void board_update(ChessBoard *board, enum Square sq,
 // Game state evaluation
 bool board_drawn_by_insufficient_material(
     ChessBoard *board, enum Color color); // Check material draw
-int is_draw(ChessBoard *board, int ply);  // Check if position is drawn
+bool is_draw(ChessBoard *board, int ply); // Check if position is drawn
 
 #endif // BOARD_H
