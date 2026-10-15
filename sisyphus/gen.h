@@ -52,5 +52,6 @@ int illegal_to_move(ChessBoard *board); // Check if position is illegal
 int is_check(ChessBoard *board);        // Check if king is in check
 int move_gives_check(ChessBoard *board,
                      const Move move); // Check if move gives check
+bool is_valid(ChessBoard *board);
 
 #endif // GEN_H
