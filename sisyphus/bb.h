@@ -17,6 +17,9 @@
 #define SET_BIT(bbit, sq) ((bbit) |= BIT(sq))
 #define CLEAR_BIT(bbit, sq) ((bbit) &= ~BIT(sq))
 
+#define lsb(x) get_lsb(x)
+#define msb(x) get_msb(x)
+
 // Pre-calculated move bitboards for each piece type and square
 extern bb BB_PAWNS[2][64];
 extern bb BB_KNIGHT[64];

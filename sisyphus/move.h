@@ -39,6 +39,10 @@
 #define place_promo_piece(board, dst, flag, color)                             \
   board_update((board), (dst), make_piece_type(PROMO_PT(flag), (color)))
 
+#define us(b) (b->color ? b->bb_squares[BLACK] : b->bb_squares[WHITE])
+
+#define them(b) (b->color ? b->bb_squares[WHITE] : b->bb_squares[BLACK])
+
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)
 static INLINE Move encode_move(enum Square from, enum Square to,
@@ -65,6 +69,20 @@ static INLINE int extract_flags(const Move move) {
 static INLINE void emit_move(Move **moves, enum Square from, enum Square to,
                              enum ColoredPiece piece, int flag) {
   *(*moves)++ = encode_move(from, to, piece, flag);
+}
+
+static INLINE bool is_en_passant(ChessBoard *board, const Move move) {
+  enum Square from = extract_from(move);
+  enum Square to = extract_to(move);
+  bb pawns = board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN];
+  bb us = us(board);
+  if (board->ep == EMPTY_BB)
+    return false;
+  if (to != (enum Square)lsb(board->ep))
+    return false;
+  if ((BIT(from) & us & pawns) == 0)
+    return false;
+  return true;
 }
 
 // Move scoring tables
