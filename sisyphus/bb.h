@@ -8,10 +8,10 @@
 #define BIT(sq) (U64(1) << (sq))
 
 #define POP_LSB(b, x)                                                          \
-  b = get_lsb(x);                                                              \
+  b = lsb(x);                                                                  \
   x &= ~BIT(b);
 #define POP_MSB(b, x)                                                          \
-  b = get_msb(x);                                                              \
+  b = msb(x);                                                                  \
   x &= ~BIT(b);
 
 #define SET_BIT(bbit, sq) ((bbit) |= BIT(sq))
@@ -36,6 +36,24 @@ extern int OFFSET_BISHOP[64];
 extern int OFFSET_ROOK[64];
 extern bb ATTACK_BISHOP[5248];
 extern bb ATTACK_ROOK[102400];
+
+#define pawns(board)                                                           \
+  ((board)->bb_squares[WHITE_PAWN] | (board)->bb_squares[BLACK_PAWN])
+#define knights(board)                                                         \
+  ((board)->bb_squares[WHITE_KNIGHT] | (board)->bb_squares[BLACK_KNIGHT])
+#define bishops(board)                                                         \
+  ((board)->bb_squares[WHITE_BISHOP] | (board)->bb_squares[BLACK_BISHOP])
+#define rooks(board)                                                           \
+  ((board)->bb_squares[WHITE_ROOK] | (board)->bb_squares[BLACK_ROOK])
+#define queens(board)                                                          \
+  ((board)->bb_squares[WHITE_QUEEN] | (board)->bb_squares[BLACK_QUEEN])
+#define kings(board)                                                           \
+  ((board)->bb_squares[WHITE_KING] | (board)->bb_squares[BLACK_KING])
+
+#define occ(board, color) ((board)->occ[(color)])
+#define white(board) occ(board, WHITE)
+#define black(board) occ(board, BLACK)
+#define other(board, color) occ(board, !(color))
 
 // Initialize bitboard lookup tables
 void bb_init();

@@ -267,16 +267,12 @@ int staticExchangeEvaluation(ChessBoard *board, Move move, int threshold) {
     return 1;
 
   int color = board->color;
-  bb occ = board->occ[BOTH] ^ BIT(src) ^ BIT(dst);
+  bb occ = occ(board, BOTH) ^ BIT(src) ^ BIT(dst);
   bb attackers = bb_attacks_to_square(board, dst, occ);
   bb mine, leastattacker;
 
-  const bb diag =
-      board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP] |
-      board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
-  const bb straight =
-      board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK] |
-      board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
+  const bb diag = bishops(board) | queens(board);
+  const bb straight = rooks(board) | queens(board);
 
   int result = 1;
 
@@ -284,7 +280,7 @@ int staticExchangeEvaluation(ChessBoard *board, Move move, int threshold) {
     color ^= BLACK;
     attackers &= occ;
 
-    if (!(mine = (attackers & board->occ[color])))
+    if (!(mine = (attackers & occ(board, color))))
       break;
 
     result &= BLACK;
@@ -320,7 +316,7 @@ int staticExchangeEvaluation(ChessBoard *board, Move move, int threshold) {
       attackers |= (bb_get_bishop_attacks(dst, occ) & diag) |
                    (bb_get_rook_attacks(dst, occ) & straight);
     } else
-      return (attackers & ~board->occ[color]) ? result ^ BLACK : result;
+      return (attackers & ~occ(board, color)) ? result ^ BLACK : result;
   }
   return result;
 }

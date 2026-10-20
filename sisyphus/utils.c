@@ -4,15 +4,6 @@
 #include <stdio.h>
 #include <sys/time.h>
 
-void memset32(void *dest, uint16_t value, size_t count) {
-  uint32_t *ptr = (uint32_t *)dest;
-  while (count > 0) {
-    *ptr = value;
-    ptr++;
-    count--;
-  }
-}
-
 char *xstrdup(const char *src) {
   char *s2;
   size_t len;

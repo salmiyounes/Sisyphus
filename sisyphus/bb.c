@@ -141,46 +141,31 @@ INLINE bb bb_get_king_attacks(enum Square sq) {
 
 INLINE int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
   assert(b_king);
-  int king_sq = get_lsb(b_king);
+  int king_sq = lsb(b_king);
   return is_square_attacked_by(board, king_sq, board->color);
 }
 
 INLINE bool bb_is_check(ChessBoard *board) {
-  bb them = board->occ[!board->color];
-  int sq = get_lsb(board->bb_squares[board->color ? BLACK_KING : WHITE_KING]);
+  bb them = other(board, board->color);
+  int sq = lsb(board->bb_squares[board->color ? BLACK_KING : WHITE_KING]);
+  bb occupied = occ(board, BOTH);
 
-  return (bb_get_rook_attacks(sq, board->occ[BOTH]) &
-          ((board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK] |
-            board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN]) &
-           them)) ||
-         (bb_get_bishop_attacks(sq, board->occ[BOTH]) &
-          ((board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP] |
-            board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN]) &
-           them)) ||
-         (bb_get_knight_attacks(sq) &
-          ((board->bb_squares[WHITE_KNIGHT] | board->bb_squares[BLACK_KNIGHT]) &
-           them)) ||
-         (bb_pawns_attacks(sq, board->color) &
-          ((board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN]) &
-           them));
+  return (bb_get_rook_attacks(sq, occupied) & (rooks(board) | queens(board)) &
+          them) ||
+         (bb_get_bishop_attacks(sq, occupied) &
+          (bishops(board) | queens(board)) & them) ||
+         (bb_get_knight_attacks(sq) & knights(board) & them) ||
+         (bb_get_pawns_attacks(sq, board->color) & pawns(board) & them);
 }
 
-INLINE bb bb_attacks_to_square(ChessBoard *board, enum Square sq, bb occ) {
-  bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
-  bb bishops =
-      board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];
-  bb rooks = board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK];
-  bb knights =
-      board->bb_squares[WHITE_KNIGHT] | board->bb_squares[BLACK_KNIGHT];
-  bb kings = board->bb_squares[WHITE_KING] | board->bb_squares[BLACK_KING];
-
+INLINE bb bb_attacks_to_square(ChessBoard *board, enum Square sq, bb occupied) {
   return (bb_get_pawns_attacks(sq, WHITE) & board->bb_squares[BLACK_PAWN]) |
          (bb_get_pawns_attacks(sq, BLACK) & board->bb_squares[WHITE_PAWN]) |
-         (bb_get_knight_attacks(sq) & knights) |
-         (bb_get_bishop_attacks(sq, occ) & bishops) |
-         (bb_get_rook_attacks(sq, occ) & rooks) |
-         (bb_get_queen_attacks(sq, occ) & queens) |
-         (bb_get_king_attacks(sq) & kings);
+         (bb_get_knight_attacks(sq) & knights(board)) |
+         (bb_get_bishop_attacks(sq, occupied) & bishops(board)) |
+         (bb_get_rook_attacks(sq, occupied) & rooks(board)) |
+         (bb_get_queen_attacks(sq, occupied) & queens(board)) |
+         (bb_get_king_attacks(sq) & kings(board));
 }
 
 bb bb_pawns_attacks(enum Square sq, enum Color color) {

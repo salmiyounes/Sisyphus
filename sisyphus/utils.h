@@ -5,9 +5,6 @@
 #include <stdlib.h>
 #include <string.h>
 
-//
-void memset32(void *dest, uint16_t value, size_t count);
-
 // String duplication function
 char *xstrdup(const char *src);
 

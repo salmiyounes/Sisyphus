@@ -491,57 +491,49 @@ INLINE int illegal_to_move(ChessBoard *board) {
 INLINE int is_check(ChessBoard *board) { return bb_is_check(board); }
 
 INLINE bool is_valid(ChessBoard *board) {
-  bb pawns = board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN];
-  bb knights =
-      board->bb_squares[WHITE_KNIGHT] | board->bb_squares[BLACK_KNIGHT];
-  bb bishops =
-      board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];
-  bb rooks = board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK];
-  bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
-  bb kings = board->bb_squares[WHITE_KING] | board->bb_squares[BLACK_KING];
-  bb white = board->occ[WHITE];
-  bb black = board->occ[BLACK];
-  if (popcount(kings) != 2)
+  if (popcount(kings(board)) != 2)
     return false;
-  if (popcount(kings & white) != 1)
+  if (popcount(kings(board) & white(board)) != 1)
     return false;
-  if (popcount(kings & black) != 1)
+  if (popcount(kings(board) & black(board)) != 1)
     return false;
-  if ((white & black) != 0)
+  if ((white(board) & black(board)) != 0)
     return false;
-  if ((kings & queens) != 0)
+  if ((kings(board) & queens(board)) != 0)
     return false;
-  if ((kings & rooks) != 0)
+  if ((kings(board) & rooks(board)) != 0)
     return false;
-  if ((kings & bishops) != 0)
+  if ((kings(board) & bishops(board)) != 0)
     return false;
-  if ((kings & knights) != 0)
+  if ((kings(board) & knights(board)) != 0)
     return false;
-  if ((kings & pawns) != 0)
+  if ((kings(board) & pawns(board)) != 0)
     return false;
-  if ((queens & rooks) != 0)
+  if ((queens(board) & rooks(board)) != 0)
     return false;
-  if ((queens & bishops) != 0)
+  if ((queens(board) & bishops(board)) != 0)
     return false;
-  if ((queens & knights) != 0)
+  if ((queens(board) & knights(board)) != 0)
     return false;
-  if ((queens & pawns) != 0)
+  if ((queens(board) & pawns(board)) != 0)
     return false;
-  if ((rooks & bishops) != 0)
+  if ((rooks(board) & bishops(board)) != 0)
     return false;
-  if ((rooks & knights) != 0)
+  if ((rooks(board) & knights(board)) != 0)
     return false;
-  if ((rooks & pawns) != 0)
+  if ((rooks(board) & pawns(board)) != 0)
     return false;
-  if ((bishops & knights) != 0)
+  if ((bishops(board) & knights(board)) != 0)
     return false;
-  if ((bishops & pawns) != 0)
+  if ((bishops(board) & pawns(board)) != 0)
     return false;
-  if ((knights & pawns) != 0)
+  if ((knights(board) & pawns(board)) != 0)
     return false;
-  if (pawns & BOARD_FILE_EDGE)
+  if (pawns(board) & BOARD_FILE_EDGE)
     return false;
-  if ((white | black) != (kings | queens | rooks | bishops | knights | pawns))
+  if ((white(board) | black(board)) !=
+      (kings(board) | queens(board) | rooks(board) | bishops(board) |
+       knights(board) | pawns(board)))
     return false;
   return illegal_to_move(board);
 }

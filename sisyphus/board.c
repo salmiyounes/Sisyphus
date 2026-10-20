@@ -44,7 +44,9 @@ void board_clear(ChessBoard *board) {
     die("board_clear(): board is NULL");
 
   memset(board, 0, sizeof(ChessBoard));
-  memset32(board->squares, NONE, SQUARE_NB);
+
+  for (int sq = 0; sq < SQUARE_NB; sq++)
+    board->squares[sq] = NONE;
 
   board->castle = CASTLE_ALL;
   castling_rights[0] = CASTLE_WHITE_QUEEN_SIDE;
@@ -114,7 +116,7 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   case NONE:
     break;
   default:
-    __builtin_unreachable();
+    trap();
   }
 
   switch (piece) {
@@ -135,7 +137,7 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   case NONE:
     break;
   default:
-    __builtin_unreachable();
+    trap();
   }
 }
 
@@ -193,27 +195,17 @@ int board_drawn_by_repetition(ChessBoard *board, int ply) {
 }
 
 bool board_drawn_by_insufficient_material(ChessBoard *board, enum Color color) {
-  bb pawns = board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN];
-  bb knights =
-      board->bb_squares[WHITE_KNIGHT] | board->bb_squares[BLACK_KNIGHT];
-  bb bishops =
-      board->bb_squares[WHITE_BISHOP] | board->bb_squares[BLACK_BISHOP];
-  bb rooks = board->bb_squares[WHITE_ROOK] | board->bb_squares[BLACK_ROOK];
-  bb queens = board->bb_squares[WHITE_QUEEN] | board->bb_squares[BLACK_QUEEN];
-  bb kings = board->bb_squares[WHITE_KING] | board->bb_squares[BLACK_KING];
-  bb occ = board->occ[color];
-  bb other = board->occ[!color];
-
-  if (occ & (pawns | rooks | queens))
+  if (occ(board, color) & (pawns(board) | rooks(board) | queens(board)))
     return false;
 
-  if (occ & knights)
-    return ((popcount(occ) <= 2) && !(other & ~queens & ~kings));
+  if (occ(board, color) & knights(board))
+    return ((popcount(occ(board, color)) <= 2) &&
+            !(other(board, color) & ~queens(board) & ~kings(board)));
 
-  if (occ & bishops) {
-    bool same_color =
-        !(bishops & BB_DARK_SQUARES) || !(bishops & BB_LIGHT_SQUARES);
-    return (same_color && !pawns && !knights);
+  if (occ(board, color) & bishops(board)) {
+    bool same_color = !(bishops(board) & BB_DARK_SQUARES) ||
+                      !(bishops(board) & BB_LIGHT_SQUARES);
+    return (same_color && !pawns(board) && !knights(board));
   }
 
   return true;
@@ -385,7 +377,7 @@ void board_to_fen(ChessBoard *board, char *fen) {
   } else
     *fen++ = '-';
 
-  sq = !!board->ep ? get_lsb(board->ep) : -1;
+  sq = !!board->ep ? lsb(board->ep) : -1;
   sq_to_string(sq, str);
 
   snprintf(fen, 4, " %s", str);

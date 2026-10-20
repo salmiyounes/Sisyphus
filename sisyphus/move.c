@@ -194,7 +194,7 @@ void do_move(ChessBoard *board, Move move, Undo *undo) {
     _handle_black_king(board, src, dst, flag);
     break;
   default:
-    __builtin_unreachable();
+    trap();
   }
 
   // Update the castling rights
@@ -249,7 +249,7 @@ void undo_move(ChessBoard *board, Move move, Undo *undo) {
     _unmake_black_king(board, src, dst, flag);
     break;
   default:
-    __builtin_unreachable();
+    trap();
   }
 
   SWITCH_SIDE(board);

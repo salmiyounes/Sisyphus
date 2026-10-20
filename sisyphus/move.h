@@ -34,7 +34,7 @@
   if (board->castle)                                                           \
     board->hash ^= HASH_CASTLE[board->castle];                                 \
   if (board->ep)                                                               \
-    board->hash ^= HASH_EP[file_of(get_lsb(board->ep))];
+    board->hash ^= HASH_EP[file_of(lsb(board->ep))];
 
 #define place_promo_piece(board, dst, flag, color)                             \
   board_update((board), (dst), make_piece_type(PROMO_PT(flag), (color)))

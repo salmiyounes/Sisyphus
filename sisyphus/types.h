@@ -25,6 +25,8 @@
 #define die(...)
 #endif
 
+#define trap() __builtin_trap()
+
 // Assertion macro
 #if !defined(DISABLE_ASSERT)
 #define ASSERT(expr) assert(expr)
