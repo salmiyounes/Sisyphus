@@ -296,6 +296,9 @@ chess_lib.illegal_to_move.argtypes = [POINTER(ChessBoard)]
 chess_lib.illegal_to_move.restype = c_int
 chess_lib.is_check.argtypes = [POINTER(ChessBoard)]
 chess_lib.is_check.restype = c_int
+chess_lib.is_valid.argtypes = [POINTER(ChessBoard)]
+chess_lib.is_valid.restype = c_bool
+
 
 # Move Handling functions
 chess_lib.do_move.argtypes = [POINTER(ChessBoard), c_uint32, POINTER(Undo)]
@@ -1296,8 +1299,72 @@ class BaseBoard:
         chess_lib.board_to_fen(self.ptr, buffer)
         return buffer.value.decode("utf-8")
 
-    def set_fen(self, fen: str) -> None:
+    def _validate_board_fen(self, fen: str) -> None:
+        parts = fen.split()
+
+        try:
+            board_part = parts.pop(0)
+        except IndexError:
+            raise ValueError("empty fen")
+
+        fen = board_part.strip()
+        if " " in fen:
+            raise ValueError(
+                f"expected position part of fen, got multiple parts: {fen!r}"
+            )
+
+        rows = fen.split("/")
+        if len(rows) != 8:
+            raise ValueError(f"expected 8 rows in position part of fen: {fen!r}")
+
+        for row in rows:
+            field_sum = 0
+            previous_was_digit = False
+            previous_was_piece = False
+
+            for c in row:
+                if c in ["1", "2", "3", "4", "5", "6", "7", "8"]:
+                    if previous_was_digit:
+                        raise ValueError(
+                            f"two subsequent digits in position part of fen: {fen!r}"
+                        )
+                    field_sum += int(c)
+                    previous_was_digit = True
+                    previous_was_piece = False
+                elif c == "~":
+                    if not previous_was_piece:
+                        raise ValueError(
+                            f"'~' not after piece in position part of fen: {fen!r}"
+                        )
+                    previous_was_digit = False
+                    previous_was_piece = False
+                elif c.lower() in PIECE_SYMBOLS:
+                    field_sum += 1
+                    previous_was_digit = False
+                    previous_was_piece = True
+                else:
+                    raise ValueError(
+                        f"invalid character in position part of fen: {fen!r}"
+                    )
+
+            if field_sum != 8:
+                raise ValueError(
+                    f"expected 8 columns per row in position part of fen: {fen!r}"
+                )
+
+    def _set_fen(self, fen: str) -> None:
+        backup = self.board_to_fen()
         chess_lib.board_load_fen(self.ptr, fen.encode())
+        if not chess_lib.is_valid(self.ptr):
+            self._restore(backup)
+            raise ValueError(f"illegal position: {fen!r}")
+
+    def _restore(self, backup: str | None) -> None:
+        if backup is not None:
+            chess_lib.board_load_fen(self.ptr, backup.encode())
+
+    def set_fen(self, fen: str) -> None:
+        self._set_fen(fen)
 
     def is_check(self) -> bool:
         return bool(chess_lib.is_check(self.ptr))

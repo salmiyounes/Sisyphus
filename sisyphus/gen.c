@@ -490,7 +490,7 @@ INLINE int illegal_to_move(ChessBoard *board) {
 
 INLINE int is_check(ChessBoard *board) { return bb_is_check(board); }
 
-INLINE bool is_valid(ChessBoard *board) {
+bool is_valid(ChessBoard *board) {
   if (popcount(kings(board)) != 2)
     return false;
   if (popcount(kings(board) & white(board)) != 1)
@@ -535,7 +535,7 @@ INLINE bool is_valid(ChessBoard *board) {
       (kings(board) | queens(board) | rooks(board) | bishops(board) |
        knights(board) | pawns(board)))
     return false;
-  return illegal_to_move(board);
+  return !illegal_to_move(board);
 }
 
 int move_gives_check(ChessBoard *board, const Move move) {
