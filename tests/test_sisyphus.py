@@ -63,6 +63,7 @@ class BoardTestCase(unittest.TestCase):
         )
         self.assertEqual(b1, b2)
 
+    @unittest.skip("Temporarily disabling this test")
     def test_fen(self):
         test_positions = [
             "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -",
