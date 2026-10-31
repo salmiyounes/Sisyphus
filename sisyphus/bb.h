@@ -5,6 +5,8 @@
 
 /* Macros */
 #define EMPTY_BB U64(0)
+#define BB_LIGHT_SQUARES U64(0x55aa55aa55aa55aa)
+#define BB_DARK_SQUARES U64(0xaa55aa55aa55aa55)
 #define BIT(sq) (U64(1) << (sq))
 
 #define POP_LSB(b, x)                                                          \
@@ -54,6 +56,8 @@ extern bb ATTACK_ROOK[102400];
 #define white(board) occ(board, WHITE)
 #define black(board) occ(board, BLACK)
 #define other(board, color) occ(board, !(color))
+#define us(board) occ(board, (board)->color)
+#define them(board) other(board, (board)->color)
 
 // Initialize bitboard lookup tables
 void bb_init();

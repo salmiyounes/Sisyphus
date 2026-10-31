@@ -39,10 +39,6 @@
 #define place_promo_piece(board, dst, flag, color)                             \
   board_update((board), (dst), make_piece_type(PROMO_PT(flag), (color)))
 
-#define us(b) (b->color ? b->bb_squares[BLACK] : b->bb_squares[WHITE])
-
-#define them(b) (b->color ? b->bb_squares[WHITE] : b->bb_squares[BLACK])
-
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)
 static INLINE Move encode_move(enum Square from, enum Square to,

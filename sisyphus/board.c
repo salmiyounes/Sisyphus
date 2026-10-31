@@ -7,9 +7,6 @@
 #include <ctype.h>
 #include <string.h>
 
-#define BB_LIGHT_SQUARES U64(0x55aa55aa55aa55aa)
-#define BB_DARK_SQUARES U64(0xaa55aa55aa55aa55)
-
 static const char *PIECE_SYMBOLS[13] = {
     [WHITE_PAWN] = "♟ ", [WHITE_KNIGHT] = "♞ ", [WHITE_BISHOP] = "♝ ",
     [WHITE_ROOK] = "♜ ", [WHITE_QUEEN] = "♛ ",  [WHITE_KING] = "♚ ",
