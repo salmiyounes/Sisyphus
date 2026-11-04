@@ -23,6 +23,8 @@ __license__ = "MIT"
 
 import dataclasses
 import os
+import typing
+from collections.abc import Callable, Iterator
 from ctypes import (
     CDLL,
     POINTER,
@@ -40,18 +42,11 @@ from ctypes import (
     create_string_buffer,
     pointer,
 )
-from typing import (
-    Any,
-    Callable,
-    Iterator,
-    List,
-    Optional,
-    Self,
-    Tuple,
-    TypeAlias,
-    Union,
-    cast,
-)
+
+from typing import Any, cast
+
+if typing.TYPE_CHECKING:
+    from typing_extensions import Self, TypeAlias
 
 # Starting possition fen
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
@@ -140,7 +135,7 @@ Color: TypeAlias = int
 WHITE: Color = 0
 BLACK: Color = 1
 BOTH: Color = 2
-COLORS: List[Color] = [WHITE, BLACK]
+COLORS: list[Color] = [WHITE, BLACK]
 
 # Flags
 Flags: TypeAlias = int
@@ -173,7 +168,7 @@ KING: Piece = 5
 NONE: Piece = 12
 
 # Piece symbols list
-PIECE_SYMBOLS: List[str] = ["p", "n", "b", "r", "q", "k"]
+PIECE_SYMBOLS: list[str] = ["p", "n", "b", "r", "q", "k"]
 
 
 class ChessBoard(Structure):
@@ -308,7 +303,7 @@ chess_lib.undo_move.restype = c_void_p
 chess_lib.move_to_str.argtypes = [c_uint32]
 chess_lib.move_to_str.restype = c_char_p
 chess_lib.make_move.argtypes = [POINTER(ChessBoard), c_uint32]
-chess_lib.make_move.restype = c_void_p
+chess_lib.make_move.restype = c_bool
 
 # Search and functions
 chess_lib.thread_init.argtypes = [
@@ -327,8 +322,6 @@ chess_lib.best_move.restype = c_int
 
 class IllegalMoveError(ValueError):
     """Exception raised when attempting to make an illegal chess move."""
-
-    pass
 
 
 class utils:
@@ -546,7 +539,7 @@ class utils:
         )
 
     @staticmethod
-    def scan_move_list(arr: List[int]) -> Iterator[List[Any]]:
+    def scan_move_list(arr: list[int]) -> Iterator[list[Any]]:
         """Convert a list of encoded moves into move components.
 
         Args:
@@ -563,14 +556,14 @@ class utils:
         def extract_target_sq(x: int) -> Square:
             return (x >> 6) & 0x3F
 
-        def extract_piece_type(x: int) -> Optional[PieceType]:
+        def extract_piece_type(x: int) -> PieceType | None:
             index: int = (x >> 12) & 0xF
             return PieceType.from_index(index)
 
         def extract_flag_type(x: int) -> Flags:
             return (x >> 16) & 0xF
 
-        extractors: List[Callable[[int], Union[Square, Optional[PieceType], Flags]]] = [
+        extractors: list[Callable[[int], Square | PieceType | None | Flags]] = [
             extract_source_sq,
             extract_target_sq,
             extract_piece_type,
@@ -636,7 +629,7 @@ class PieceType:
         return (self.piece * BOTH) + self.color
 
     @classmethod
-    def from_index(cls, index: int) -> Optional[PieceType]:
+    def from_index(cls, index: int) -> PieceType | None:
         """Create a PieceType from an integer index representation.
 
         Args:
@@ -714,7 +707,7 @@ class Move:
     dst_sq: Square
     """Destenation square"""
 
-    piece: Optional[PieceType] = None
+    piece: PieceType | None = None
     """Piece type"""
 
     flag: Flags = EMPTY_FLAG
@@ -786,7 +779,7 @@ class Move:
         to_sq = square(uci[2:4])
 
         # make sure there's something to move
-        piece = board.board.piece_at(from_sq)
+        piece = board.piece_at(from_sq)
         if piece is None:
             raise ValueError(f"No piece on source square {uci[0:2]!r}")
 
@@ -812,16 +805,12 @@ class Move:
 
         # en-passant? (pawn captures diagonally onto empty square)
         file_diff = abs((to_sq % 8) - (from_sq % 8))
-        if (
-            piece.piece == PAWN
-            and file_diff == 1
-            and board.board.piece_at(to_sq) is None
-        ):
+        if piece.piece == PAWN and file_diff == 1 and board.piece_at(to_sq) is None:
             flag = ENP_FLAG
 
         return cls(from_sq, to_sq, piece, flag)
 
-    def promo_piece_type(self) -> Optional[Piece]:
+    def promo_piece_type(self) -> Piece | None:
         """Get the piece type for a promotion move.
 
         Returns:
@@ -900,7 +889,7 @@ class SquareSet:
         mask (BitBoard): The underlying 64-bit integer representing the set of squares
     """
 
-    def __init__(self, mask: Optional[BitBoard] = 0):
+    def __init__(self, mask: BitBoard | None = 0):
         self.mask = 0 if mask is None else mask
 
     def __len__(self) -> int:
@@ -983,13 +972,13 @@ class SquareSet:
         """
         return SquareSet(self.mask)
 
-    def tolist(self) -> List[bool]:
+    def tolist(self) -> list[bool]:
         """Convert the bitboard to a list of boolean values.
 
         Returns:
             List of 64 booleans indicating which squares are set
         """
-        arr: List[bool] = [False] * SQUARE_NB
+        arr: list[bool] = [False] * SQUARE_NB
         for sq in self:
             arr[sq] = True
         return arr
@@ -1034,7 +1023,7 @@ class Searcher:
             # Initialize search thread
             chess_lib.thread_init(
                 byref(self.search),
-                self.board.board.ptr,
+                self.board.ptr,
                 byref(self.move),
                 time_s,
                 self.debug,
@@ -1217,7 +1206,7 @@ class BaseBoard:
         mask: BitBoard = self.kings(color).mask
         return utils.get_lsb(mask)
 
-    def piece_at(self, square: Square) -> Optional[PieceType]:
+    def piece_at(self, square: Square) -> PieceType | None:
         """Get the piece at a given square.
 
         Args:
@@ -1234,7 +1223,7 @@ class BaseBoard:
         piece = self.baseboard.squares[square]
         return PieceType.from_index(piece)
 
-    def color_at(self, square: Square) -> Optional[Color]:
+    def color_at(self, square: Square) -> Color | None:
         """Get the color of the piece at a given square.
 
         Args:
@@ -1278,8 +1267,8 @@ class BaseBoard:
     def clear(self) -> None:
         chess_lib.board_clear(self.ptr)
 
-    def tolist(self) -> List[Optional[PieceType]]:
-        arr: List[Optional[PieceType]] = [None] * SQUARE_NB
+    def tolist(self) -> list[PieceType | None]:
+        arr: list[PieceType | None] = [None] * SQUARE_NB
         for sq in self:
             arr[sq] = self.piece_at(sq)
         return arr
@@ -1292,7 +1281,6 @@ class BaseBoard:
 
     def unicode_print(self) -> None:
         chess_lib.print_board(self.ptr)
-        return None
 
     def board_to_fen(self) -> str:
         buffer: Array[c_char] = utils.create_string_buffer(256)
@@ -1372,11 +1360,13 @@ class BaseBoard:
     def illegal_to_move(self) -> bool:
         return bool(chess_lib.illegal_to_move(self.ptr))
 
-    def perft(self, depth: Optional[int] = 1) -> int:
+    def perft(self, depth: int | None = 1) -> int:
         nodes = chess_lib.perft_test(self.ptr, depth)
         return int(nodes)
 
+    @property
     def turn(self) -> Color:
+        """Get the turn color '0' for WHITE, '1' for BLACK"""
         color = self.baseboard.color
         return Color(color)
 
@@ -1391,7 +1381,7 @@ class MoveUndo:
         self.undo = Undo()
 
     @property
-    def piece(self) -> Optional[PieceType]:
+    def piece(self) -> PieceType | None:
         """Get the piece that made the move.
 
         Returns:
@@ -1404,7 +1394,7 @@ class MoveUndo:
         return None
 
     @property
-    def capture(self) -> Optional[PieceType]:
+    def capture(self) -> PieceType | None:
         """Get the piece that was captured by this move.
 
         Returns:
@@ -1414,7 +1404,7 @@ class MoveUndo:
         return PieceType.from_index(capture)
 
     @property
-    def enp_square(self) -> Optional[Square]:
+    def enp_square(self) -> Square | None:
         """Get the en passant square if this was an en passant capture.
 
         Returns:
@@ -1442,7 +1432,7 @@ class MoveUndo:
         return False
 
 
-class Board:
+class Board(BaseBoard):
     """A chess board representation with move generation and validation.
 
     The Board class provides a high-level interface for chess game mechanics including:
@@ -1461,7 +1451,7 @@ class Board:
     - Move counters
 
     Attributes:
-        board (BaseBoard): Low-level bitboard representation
+        baseboard (ChessBoard): Internal C structure (inherited from BaseBoard)
         _handle_moves (MovesStack): Stack of moves and their undo information
 
     Example:
@@ -1472,34 +1462,23 @@ class Board:
         >>> board.pop()  # Take back the move
     """
 
-    def __init__(self, fen: Optional[str] = None):
-        self.board: BaseBoard = BaseBoard()
+    def __init__(self, fen: str | None = None):
+        super().__init__()
         if fen is None:
             self.set_fen(STARTING_FEN)
         else:
             self.set_fen(fen)
         self._handle_moves: MovesStack = MovesStack(self)
 
-    def drawn_by_insufficient_material(self) -> bool:
-        """Check if the position is drawn due to insufficient material.
-
-        Returns:
-            bool: True if neither side has sufficient material to checkmate
-        """
-        return self.board.drawn_by_insufficient_material()
-
     def clear(self) -> None:
         """Reset the board to starting position and clear move history."""
-        self.board.clear()
+        super().clear()
         self._handle_moves.clear()
         self.set_fen(fen=STARTING_FEN)
 
-    def castling_rights(self) -> int:
-        return self.board.castling_rights()
-
     def _generate_moves(self, func_name: str) -> Iterator[Move]:
         array: Array[Any] = utils.create_uint32_array(MAX_MOVES)
-        size: int = getattr(chess_lib, func_name)(self.board.ptr, array)
+        size: int = getattr(chess_lib, func_name)(self.ptr, array)
         for data in utils.scan_move_list(array[:size]):
             yield Move(*data)
 
@@ -1508,11 +1487,6 @@ class Board:
 
     def generate_legal_moves(self) -> Iterator[Move]:
         return self._generate_moves("gen_legal_moves")
-
-    @property
-    def turn(self) -> Color:
-        """Get the turn color '0' for WHITE, '1' for BLACK"""
-        return self.board.turn()
 
     @property
     def gen_legal_moves(self) -> LegalMoveGenerator:
@@ -1529,7 +1503,7 @@ class Board:
         Returns:
             str: The position in Forsyth–Edwards Notation
         """
-        return self.board.board_to_fen()
+        return self.board_to_fen()
 
     def set_fen(self, fen: object) -> None:
         """Set the board position from a FEN string.
@@ -1545,7 +1519,7 @@ class Board:
             raise TypeError("FEN must be a string")
         if not fen:
             raise ValueError("FEN cannot be empty")
-        self.board.set_fen(fen)
+        super().set_fen(fen)
 
     def perft_test(self, depth: int = 1) -> BitBoard:
         """Calculate number of legal moves at given depth (performance test).
@@ -1561,18 +1535,7 @@ class Board:
         """
         if depth <= 0:
             raise ValueError("Depth must be non-negative")
-        return self.board.perft(depth)
-
-    def color_at(self, square: Square) -> Optional[Color]:
-        """Get the color of the piece at given square.
-
-        Args:
-            square: Square index (0-63)
-
-        Returns:
-            Optional[Color]: WHITE, BLACK, or None if empty
-        """
-        return self.board.color_at(square)
+        return self.perft(depth)
 
     def is_game_over(self) -> bool:
         """Check if the game is over.
@@ -1611,16 +1574,9 @@ class Board:
         """
         return not self.is_check() and not any(self.gen_legal_moves)
 
-    def is_check(self) -> bool:
-        """Check if the side to move is in check.
-
-        Returns:
-            bool: True if the current side's king is under attack
-        """
-        return self.board.is_check()
-
-    def illegal_to_move(self) -> bool:
-        return self.board.illegal_to_move()
+    def is_legal(self, move: Move) -> bool:
+        dummy = self.copy()
+        return cast(bool, chess_lib.make_move(dummy.ptr, hash(move)))
 
     def checkers(self, color: Color) -> SquareSet:
         """Get pieces giving check to a king.
@@ -1645,7 +1601,7 @@ class Board:
         . . . . . . . .
         . . . . . . . .
         """
-        king_sq: int = self.board.king_sq(color)
+        king_sq: int = self.king_sq(color)
         return self.attackers(not color, king_sq)
 
     def is_square_attacked_by(self, color: Color, square: object) -> bool:
@@ -1669,7 +1625,7 @@ class Board:
         """
         if not isinstance(square, Square) or not (0 <= square < SQUARE_NB):
             raise ValueError(f"Invalid square index: {square}")
-        return bool(self.board.attacks(color, square))
+        return bool(self.attacks(color, square))
 
     def attackers(self, color: Color, square: object) -> SquareSet:
         """Get all pieces of a given color that attack a specific square.
@@ -1702,7 +1658,21 @@ class Board:
         """
         if not isinstance(square, Square) or not (0 <= square < SQUARE_NB):
             raise ValueError(f"Invalid square index: {square}")
-        return self.board.attacks(color, square)
+        return self.attacks(color, square)
+
+    def gives_check(self, move: Move) -> bool:
+        self.push(move)
+        try:
+            return self.is_check()
+        finally:
+            self.pop()
+
+    def gives_checkmate(self, move: Move) -> bool:
+        self.push(move)
+        try:
+            return self.is_checkmate()
+        finally:
+            self.pop()
 
     def push(self, move: Move) -> None:
         """Make a move on the board.
@@ -1738,20 +1708,20 @@ class Board:
         """Push a null move this will just flip the color
         and update the zobrist hash.
         """
-        return None
+        return
 
     def pop_null(self) -> Move:
         return NotImplemented  # type: ignore[no-any-return]
 
-    def peek(self) -> Optional[Move]:
+    def peek(self) -> Move | None:
         return self._handle_moves.peek()
 
     def copy(self) -> Self:
         dst = type(self)(None)
-        pointer(dst.board.baseboard)[
+        pointer(dst.baseboard)[
             0
         ] = (
-            self.board.baseboard
+            self.baseboard
         )  # https://stackoverflow.com/questions/1470343/python-copying-structures-contents
 
         dst._handle_moves = self._handle_moves.copy(dst)
@@ -1766,7 +1736,7 @@ class Board:
         return (
             self.fen == other.fen
             and self._handle_moves == other._handle_moves
-            and self.board == other.board
+            and super().__eq__(other)
         )
 
     def __repr__(self) -> str:
@@ -1792,14 +1762,14 @@ class Board:
         a b c d e f g h
 
         """
-        builder: List[str] = []
+        builder: list[str] = []
 
         for rank in range(7, -1, -1):
             builder.append(f"{rank + 1} ")
 
             for file in range(8):
                 square = utils.square(rank, file)
-                piece = self.board.piece_at(square)
+                piece = self.piece_at(square)
 
                 if piece:
                     builder.append(piece.symbol())
@@ -1834,10 +1804,10 @@ class Board:
 
         rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -
         """
-        self.board.unicode_print()
+        self.unicode_print()
 
     def __hash__(self) -> int:
-        return self.board.zobrist_key()
+        return self.zobrist_key()
 
 
 class PseudoLegalMoveGenerator:
@@ -1851,11 +1821,6 @@ class PseudoLegalMoveGenerator:
 
     def __iter__(self) -> Iterator[Move]:
         return self.board.generate_pseudo_legal_moves()
-
-    def __contains__(self, move: Move) -> bool:
-        return move in set(
-            self
-        )  # TODO: add a function that check if a move is psaudo legal
 
     def __repr__(self) -> str:
         sans = ", ".join(m.san for m in self)
@@ -1875,9 +1840,7 @@ class LegalMoveGenerator:
         return self.board.generate_legal_moves()
 
     def __contains__(self, move: Move) -> bool:
-        return move in set(
-            self
-        )  # TODO: add a function that check if a move is a legal move
+        return self.board.is_legal(move)
 
     def __repr__(self) -> str:
         sans = ", ".join(m.san for m in self)
@@ -1889,7 +1852,7 @@ class MovesStack:
 
     def __init__(self, board: Board) -> None:
         self.board = board
-        self._moves_history: List[Tuple[Move, MoveUndo]] = []
+        self._moves_history: list[tuple[Move, MoveUndo]] = []
 
     def push(self, move: object) -> None:
         if not isinstance(move, Move):
@@ -1902,7 +1865,7 @@ class MovesStack:
         #    )
 
         undo: MoveUndo = MoveUndo(move)
-        chess_lib.do_move(self.board.board.ptr, hash(move), undo.ptr)
+        chess_lib.do_move(self.board.ptr, hash(move), undo.ptr)
         self._moves_history.append((move, undo))
 
     def pop(self) -> Move:
@@ -1911,10 +1874,10 @@ class MovesStack:
         else:
             raise IndexError("pop from empty move history")
 
-        chess_lib.undo_move(self.board.board.ptr, hash(move), undo.ptr)
+        chess_lib.undo_move(self.board.ptr, hash(move), undo.ptr)
         return move
 
-    def peek(self) -> Optional[Move]:
+    def peek(self) -> Move | None:
         return self._moves_history[-1][0] if self._moves_history else None
 
     def clear(self) -> None:
@@ -1933,7 +1896,7 @@ class MovesStack:
     def __len__(self) -> int:
         return len(self._moves_history)
 
-    def __iter__(self) -> Iterator[Tuple[Move, MoveUndo]]:
+    def __iter__(self) -> Iterator[tuple[Move, MoveUndo]]:
         return ((mv, undo) for mv, undo in self._moves_history)
 
     def __contains__(self, move: Move) -> bool:
