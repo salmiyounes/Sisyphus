@@ -98,8 +98,8 @@ void pawn_table_set(PawnTable *table, bb key, int value) {
   entry->value = value;
 }
 
-int pawn_table_get(PawnTable *tabke, bb key) {
-  PawnEntry *entry = pawn_table_entry(tabke, key);
+int pawn_table_get(PawnTable *table, bb key) {
+  PawnEntry *entry = pawn_table_entry(table, key);
   if (entry->key == key)
     return entry->value;
   return 0;

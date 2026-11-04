@@ -48,7 +48,7 @@ from typing import Any, cast
 if typing.TYPE_CHECKING:
     from typing_extensions import Self, TypeAlias
 
-# Starting possition fen
+# Starting position fen
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
 
 _bb_initialized = False
@@ -1587,7 +1587,7 @@ class Board(BaseBoard):
         Returns:
             SquareSet: Bitboard of all pieces attacking the specified king
 
-        Exemple:
+        Example:
         >>> board = Board("r1bqkb1r/pppp1Qpp/2n2n2/4p3/2B1P3/8/PPPP1PPP/RNB1K1NR b KQkq - 0 4")
         >>>
         >>> checkers = board.checkers(BLACK)
