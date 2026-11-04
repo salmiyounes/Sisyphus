@@ -127,18 +127,12 @@ static INLINE void _unmake_black_king(ChessBoard *board, enum Square src,
   }
 }
 
-void make_move(ChessBoard *board, Move move) {
+bool make_move(ChessBoard *board, Move move) {
   Undo undo;
   do_move(board, move, &undo);
-}
 
-bool is_capture(ChessBoard *board, const Move move) {
-  return (bool)(board->squares[extract_to(move)] != NONE);
-}
-
-bool is_tactical_move(ChessBoard *board, const Move move) {
-  int flag = extract_flags(move);
-  return is_capture(board, move) || IS_ENP(flag) || IS_PROMO(flag);
+  // Provider the caller information about legality
+  return is_valid(board);
 }
 
 void do_move(ChessBoard *board, Move move, Undo *undo) {

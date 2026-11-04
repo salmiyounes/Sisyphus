@@ -70,7 +70,7 @@ static INLINE void emit_move(Move **moves, enum Square from, enum Square to,
 static INLINE bool is_en_passant(ChessBoard *board, const Move move) {
   enum Square from = extract_from(move);
   enum Square to = extract_to(move);
-  bb pawns = board->bb_squares[WHITE_PAWN] | board->bb_squares[BLACK_PAWN];
+  bb pawns = pawns(board);
   bb us = us(board);
   if (board->ep == EMPTY_BB)
     return false;
@@ -79,6 +79,14 @@ static INLINE bool is_en_passant(ChessBoard *board, const Move move) {
   if ((BIT(from) & us & pawns) == 0)
     return false;
   return true;
+}
+
+static INLINE bool is_capture(ChessBoard *board, const Move move) {
+  return test_bit(them(board), extract_to(move)) || is_en_passant(board, move);
+}
+
+static INLINE bool is_tactical_move(ChessBoard *board, const Move move) {
+  return is_capture(board, move) || IS_PROMO(extract_flags(move));
 }
 
 // Move scoring tables
@@ -91,7 +99,7 @@ static const int SEEPieceValues[] = {
 
 // Move manipulation functions
 void do_move(ChessBoard *board, Move move, Undo *undo); // Make a move
-void make_move(ChessBoard *board, Move move); // Make move without undo
+bool make_move(ChessBoard *board, Move move); // Make move without undo
 void undo_move(ChessBoard *board, Move move, Undo *undo); // Take back a move
 
 // Move scoring and evaluation

@@ -189,7 +189,7 @@ int negamax(Search *search, ChessBoard *board, int depth, int ply, int alpha,
       if (moves_searched >= FullDepthMoves && depth >= ReductionLimit &&
           !isPv && !is_check(board) &&
           !staticExchangeEvaluation(board, move, 0) &&
-          ok_to_reduce(board, move) &&
+          // ok_to_reduce(board, move) &&
           KILLER_MOVES[board->color][ply] != move) {
         value = -negamax(search, board, depth - 2, ply + 1, -alpha - 1, -alpha,
                          true);
