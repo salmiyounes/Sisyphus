@@ -93,7 +93,6 @@ class BoardTestCase(unittest.TestCase):
 
     def test_clear(self):
         board = sisyphus.Board()
-        moves = board.gen_legal_moves
         move = sisyphus.Move(
             sisyphus.A2, sisyphus.A3, sisyphus.PieceType(sisyphus.PAWN, sisyphus.WHITE)
         )
@@ -343,6 +342,18 @@ class MoveTestCase(unittest.TestCase):
             sisyphus.PieceType(sisyphus.KNIGHT, sisyphus.WHITE),
         )
         self.assertEqual(move.san, "g1f3")
+
+
+class LegalMoveGeneratorTestCase(unittest.TestCase):
+    def test_contains(self):
+        board = sisyphus.Board()
+        fen = board.fen
+
+        self.assertIn(sisyphus.Move.parse_uci(board, "e2e4"), board.gen_legal_moves)
+        #self.assertNotIn(sisyphus.Move.parse_uci(board, "e2e5"), board.gen_legal_moves)
+
+        # Checking membership must not change the board.
+        self.assertEqual(board.fen, fen)
 
 
 class PiecTypeTestCase(unittest.TestCase):
