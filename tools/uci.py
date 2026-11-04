@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import sys
-from typing import Any, Dict, List
+from typing import Any
 
 import sisyphus
 from sisyphus import Board, Move, Searcher
@@ -30,7 +30,7 @@ class UCI:
         print(f"\t\t\t\t\t\tAuthor: {sisyphus.__author__}")
         print(f"\t\t\t\t\t\tVersion: {sisyphus.__version__}\n")
 
-    def _position(self, args: List[str]) -> None:
+    def _position(self, args: list[str]) -> None:
         """Handle 'position' command."""
         if not args:
             return
@@ -48,9 +48,9 @@ class UCI:
                 self.board.push(Move.parse_uci(self.board, move))
                 self.count += 1
 
-    def _go(self, args: List[str]) -> None:
+    def _go(self, args: list[str]) -> None:
         """Handle 'go' command."""
-        params: Dict[str, Any] = {}
+        params: dict[str, Any] = {}
 
         i = 0
         while i < len(args):
