@@ -365,8 +365,7 @@ class utils:
         Returns:
             The index of the least significant set bit
         """
-        lsb = chess_lib.get_lsb(bbit)
-        return int(lsb)
+        return cast(int, chess_lib.get_lsb(bbit))
 
     @staticmethod
     def get_msb(bbit: BitBoard) -> int:
@@ -378,8 +377,7 @@ class utils:
         Returns:
             The index of the most significant set bit
         """
-        msb = chess_lib.get_msb(bbit)
-        return int(msb)
+        return cast(int, chess_lib.get_msb(bbit))
 
     @staticmethod
     def popcount(bbit: BitBoard) -> int:
@@ -391,8 +389,7 @@ class utils:
         Returns:
             The number of set bits
         """
-        count = chess_lib.popcount(bbit)
-        return int(count)
+        return cast(int, chess_lib.popcount(bbit))
 
     @staticmethod
     def test_bit(bbit: BitBoard, sq: Square) -> bool:
@@ -405,8 +402,7 @@ class utils:
         Returns:
             True if the bit is set, False otherwise
         """
-        bit = chess_lib.test_bit(bbit, sq)
-        return bool(bit)
+        return cast(bool, chess_lib.test_bit(bbit, sq))
 
     @staticmethod
     def square(rank: Square, file: Square) -> Square:
@@ -419,8 +415,7 @@ class utils:
         Returns:
             The square index (0-63)
         """
-        sq = chess_lib.square(rank, file)
-        return Square(sq)
+        return cast(Square, chess_lib.square(rank, file))
 
     @staticmethod
     def file_of(sq: Square) -> int:
@@ -432,8 +427,7 @@ class utils:
         Returns:
             The file number (0-7)
         """
-        file = chess_lib.file_of(sq)
-        return int(file)
+        return cast(int, chess_lib.file_of(sq))
 
     @staticmethod
     def rank_of(sq: Square) -> int:
@@ -445,8 +439,7 @@ class utils:
         Returns:
             The rank number (0-7)
         """
-        rank = chess_lib.rank_of(sq)
-        return int(rank)
+        return cast(int, chess_lib.rank_of(sq))
 
     @staticmethod
     def bit(sq: Square) -> int:
@@ -752,10 +745,10 @@ class Move:
             str: The move in SAN format
         """
         try:
-            result = chess_lib.move_to_str(hash(self))
+            result = cast("bytes | None", chess_lib.move_to_str(hash(self)))
             if not result:
                 return ""
-            return str(result.decode("utf-8"))
+            return result.decode("utf-8")
         except Exception as e:
             print(f"Error converting move to string: {e}")
             return ""
@@ -938,7 +931,7 @@ class SquareSet:
 
     def __eq__(self, other: object) -> bool:
         try:
-            return self.mask == SquareSet(other).mask  # type: ignore
+            return self.mask == SquareSet(cast(BitBoard, other)).mask
         except (TypeError, ValueError):
             return NotImplemented
 
@@ -1067,8 +1060,7 @@ class Searcher:
     @property
     def nodes(self) -> int:
         """Number of nodes searched."""
-        nodes = self.search.nodes
-        return int(nodes)
+        return cast(int, self.search.nodes)
 
     @property
     def is_searching(self) -> bool:
@@ -1163,8 +1155,7 @@ class BaseBoard:
         Returns:
             BitBoard: 64-bit Zobrist hash value
         """
-        hash = self.baseboard.hash
-        return BitBoard(hash)
+        return cast(BitBoard, self.baseboard.hash)
 
     def occ(self, color: object) -> SquareSet:
         """Get a bitboard of all pieces of a given color.
@@ -1182,7 +1173,7 @@ class BaseBoard:
             raise ValueError(
                 f"Invalid color value: {color}. Must be WHITE (0), BLACK (1) or BOTH (2)"
             )
-        mask: BitBoard = self.baseboard.occ[color]
+        mask = cast(BitBoard, self.baseboard.occ[color])
         return SquareSet(mask)
 
     def _get_piece_squares(self, piece: Piece, color: object) -> SquareSet:
@@ -1191,7 +1182,7 @@ class BaseBoard:
                 f"Invalid color value: {color}. Must be WHITE (0), BLACK (1)"
             )
         piece_type = PieceType(piece, BLACK if color else WHITE)
-        mask: BitBoard = self.baseboard.bb_squares[hash(piece_type)]
+        mask = cast(BitBoard, self.baseboard.bb_squares[hash(piece_type)])
         return SquareSet(mask)
 
     def pawns(self, color: Color) -> SquareSet:
@@ -1234,7 +1225,7 @@ class BaseBoard:
         """
         if not square in range(SQUARE_NB):
             raise IndexError
-        piece = self.baseboard.squares[square]
+        piece = cast(int, self.baseboard.squares[square])
         return PieceType.from_index(piece)
 
     def color_at(self, square: Square) -> Color | None:
@@ -1256,10 +1247,10 @@ class BaseBoard:
             return None
 
     def attacks_mask(self, square: Square) -> BitBoard:
-        mask: BitBoard = chess_lib.bb_attacks_to_square(
-            self.ptr, square, self.occ(BOTH).mask
+        return cast(
+            BitBoard,
+            chess_lib.bb_attacks_to_square(self.ptr, square, self.occ(BOTH).mask),
         )
-        return mask
 
     def attacks(self, color: Color, square: Square) -> SquareSet:
         """Get all pieces of a given color that attack a square.
@@ -1275,8 +1266,7 @@ class BaseBoard:
         return SquareSet(mask) & self.occ(color)
 
     def castling_rights(self) -> int:
-        rights = self.baseboard.castle
-        return int(rights)
+        return cast(int, self.baseboard.castle)
 
     def clear(self) -> None:
         chess_lib.board_clear(self.ptr)
@@ -1375,14 +1365,12 @@ class BaseBoard:
         return bool(chess_lib.illegal_to_move(self.ptr))
 
     def perft(self, depth: int | None = 1) -> int:
-        nodes = chess_lib.perft_test(self.ptr, depth)
-        return int(nodes)
+        return cast(int, chess_lib.perft_test(self.ptr, depth))
 
     @property
     def turn(self) -> Color:
         """Get the turn color '0' for WHITE, '1' for BLACK"""
-        color = self.baseboard.color
-        return Color(color)
+        return cast(Color, self.baseboard.color)
 
     @property
     def ptr(self) -> object:
@@ -1414,7 +1402,7 @@ class MoveUndo:
         Returns:
             Optional[PieceType]: The captured piece type and color, or None if no capture
         """
-        capture = self.undo.capture
+        capture = cast(int, self.undo.capture)
         return PieceType.from_index(capture)
 
     @property
@@ -1492,7 +1480,7 @@ class Board(BaseBoard):
 
     def _generate_moves(self, func_name: str) -> Iterator[Move]:
         array: Array[Any] = utils.create_uint32_array(MAX_MOVES)
-        size: int = getattr(chess_lib, func_name)(self.ptr, array)
+        size = cast(int, getattr(chess_lib, func_name)(self.ptr, array))
         for data in utils.scan_move_list(array[:size]):
             yield Move(*data)
 
@@ -1725,7 +1713,7 @@ class Board(BaseBoard):
         return
 
     def pop_null(self) -> Move:
-        return NotImplemented  # type: ignore[no-any-return]
+        return cast(Move, NotImplemented)
 
     def peek(self) -> Move | None:
         return self._handle_moves.peek()
