@@ -71,6 +71,29 @@ class BoardTestCase(unittest.TestCase):
         board.set_fen(fen)
         self.assertEqual(board.fen, fen)
 
+    def test_fen_malformed(self):
+        board = sisyphus.Board()
+        before = board.fen
+
+        bad_fens = [
+            "",  # empty
+            "8/8/8/8",  # truncated
+            "8/8/8/8/8/8/8/8/p w - -",  # nine ranks
+            "ppppppppp/8/8/8/8/8/8/8 w - -",  # nine files
+            "8/8/8/8/8/8/8/8 w - -",
+        ]
+        for bad in bad_fens:
+            with self.subTest(fen=bad):
+                with self.assertRaises(ValueError):
+                    board.set_fen(bad)
+                self.assertEqual(board.fen, before)
+
+        with self.assertRaises(TypeError):
+            board.set_fen(None)
+
+        board.set_fen(sisyphus.STARTING_FEN)
+        self.assertEqual(board.fen, sisyphus.STARTING_FEN)
+
     def test_move_making(self):
         board = sisyphus.Board()
         count = 0
@@ -350,7 +373,7 @@ class LegalMoveGeneratorTestCase(unittest.TestCase):
         fen = board.fen
 
         self.assertIn(sisyphus.Move.parse_uci(board, "e2e4"), board.gen_legal_moves)
-        #self.assertNotIn(sisyphus.Move.parse_uci(board, "e2e5"), board.gen_legal_moves)
+        # self.assertNotIn(sisyphus.Move.parse_uci(board, "e2e5"), board.gen_legal_moves)
 
         # Checking membership must not change the board.
         self.assertEqual(board.fen, fen)
