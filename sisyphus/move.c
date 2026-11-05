@@ -1,5 +1,13 @@
 #include "move.h"
 
+extern Move encode_move(enum Square from, enum Square to,
+                               enum ColoredPiece piece, int flag);
+extern enum Square extract_from(const Move move);
+extern enum Square extract_to(const Move move);
+extern enum ColoredPiece extract_piece(const Move move);
+extern int extract_flags(const Move move);
+extern bool is_en_passant(ChessBoard *board, const Move move);
+
 int History_Heuristic[COLOR_NB][SQUARE_NB][SQUARE_NB] = {0};
 Move KILLER_MOVES[COLOR_NB][64] = {0};
 

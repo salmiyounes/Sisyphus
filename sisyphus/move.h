@@ -41,33 +41,33 @@
 
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)
-static INLINE Move encode_move(enum Square from, enum Square to,
+INLINE Move encode_move(enum Square from, enum Square to,
                                enum ColoredPiece piece, int flag) {
   return (Move)(((from) | ((to) << 6) | ((piece) << 12) | ((flag) << 16)));
 }
 
-static INLINE enum Square extract_from(const Move move) {
+INLINE enum Square extract_from(const Move move) {
   return (enum Square)((move >> 0) & 0x3f);
 }
 
-static INLINE enum Square extract_to(const Move move) {
+INLINE enum Square extract_to(const Move move) {
   return (enum Square)((move >> 6) & 0x3f);
 }
 
-static INLINE enum ColoredPiece extract_piece(const Move move) {
+INLINE enum ColoredPiece extract_piece(const Move move) {
   return (enum ColoredPiece)((move >> 12) & 0xf);
 }
 
-static INLINE int extract_flags(const Move move) {
+INLINE int extract_flags(const Move move) {
   return (int)((move >> 16) & 0xf);
 }
 
-static INLINE void emit_move(Move **moves, enum Square from, enum Square to,
+INLINE void emit_move(Move **moves, enum Square from, enum Square to,
                              enum ColoredPiece piece, int flag) {
   *(*moves)++ = encode_move(from, to, piece, flag);
 }
 
-static INLINE bool is_en_passant(ChessBoard *board, const Move move) {
+INLINE bool is_en_passant(ChessBoard *board, const Move move) {
   enum Square from = extract_from(move);
   enum Square to = extract_to(move);
   bb pawns = pawns(board);

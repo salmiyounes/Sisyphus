@@ -304,6 +304,18 @@ chess_lib.move_to_str.argtypes = [c_uint32]
 chess_lib.move_to_str.restype = c_char_p
 chess_lib.make_move.argtypes = [POINTER(ChessBoard), c_uint32]
 chess_lib.make_move.restype = c_bool
+chess_lib.is_en_passant.argtypes = [POINTER(ChessBoard), c_uint32]
+chess_lib.is_en_passant.restype = c_bool
+chess_lib.extract_from.argtypes = [c_uint32]
+chess_lib.extract_from.restype = c_uint32
+chess_lib.extract_to.argtypes = [c_uint32]
+chess_lib.extract_to.restype = c_uint32
+chess_lib.extract_piece.argtypes = [c_uint32]
+chess_lib.extract_piece.restype = c_uint32
+chess_lib.extract_flags.argtypes = [c_uint32]
+chess_lib.extract_flags.restype = c_uint32
+chess_lib.encode_move.argtypes = [c_int, c_int, c_int, c_int]
+chess_lib.encode_move.restype = c_int
 
 # Search and functions
 chess_lib.thread_init.argtypes = [
@@ -322,6 +334,32 @@ chess_lib.best_move.restype = c_int
 
 class IllegalMoveError(ValueError):
     """Exception raised when attempting to make an illegal chess move."""
+
+
+# Helper Functions to extract specific fields
+def extract_source_sq(x: int) -> Square:
+    return (x >> 0) & 0x3F
+
+
+def extract_target_sq(x: int) -> Square:
+    return (x >> 6) & 0x3F
+
+
+def extract_piece_type(x: int) -> PieceType | None:
+    index: int = (x >> 12) & 0xF
+    return PieceType.from_index(index)
+
+
+def extract_flag_type(x: int) -> Flags:
+    return (x >> 16) & 0xF
+
+
+extractors: list[Callable[[int], Square | PieceType | None | Flags]] = [
+    extract_source_sq,
+    extract_target_sq,
+    extract_piece_type,
+    extract_flag_type,
+]
 
 
 class utils:
@@ -524,12 +562,7 @@ class utils:
         Returns:
             Encoded move as a 32-bit integer
         """
-        return (
-            (from_sq & 0x3F)
-            | ((to_sq & 0x3F) << 6)
-            | ((piece & 0xF) << 12)
-            | ((flag & 0xF) << 16)
-        )
+        return cast(int, chess_lib.encode_move(from_sq, to_sq, piece, flag))
 
     @staticmethod
     def scan_move_list(arr: list[int]) -> Iterator[list[Any]]:
@@ -541,28 +574,6 @@ class utils:
         Yields:
             Lists containing [source square, target square, piece type, flags]
         """
-
-        # Helper Functions to extract specific fields
-        def extract_source_sq(x: int) -> Square:
-            return (x >> 0) & 0x3F
-
-        def extract_target_sq(x: int) -> Square:
-            return (x >> 6) & 0x3F
-
-        def extract_piece_type(x: int) -> PieceType | None:
-            index: int = (x >> 12) & 0xF
-            return PieceType.from_index(index)
-
-        def extract_flag_type(x: int) -> Flags:
-            return (x >> 16) & 0xF
-
-        extractors: list[Callable[[int], Square | PieceType | None | Flags]] = [
-            extract_source_sq,
-            extract_target_sq,
-            extract_piece_type,
-            extract_flag_type,
-        ]
-
         for m in arr:
             yield [extr(m) for extr in extractors]
 
@@ -633,8 +644,8 @@ class PieceType:
         """
         if index != NONE:  # Check if 'index' is not a NONE piece type
             return cls(
-                (index & ~BLACK) >> BLACK,  # Get piece type
-                index & BLACK,  # Get color type
+                index >> 0x1,  # Get piece type
+                index & 0x1,  # Get color type
             )
         else:
             return None
@@ -1048,12 +1059,10 @@ class Searcher:
         if not move_val:
             return Move.null()
 
-        from_sq = (move_val >> 0) & 0x3F
-        to_sq = (move_val >> 6) & 0x3F
-        piece_val = (move_val >> 12) & 0xF
-        flag = (move_val >> 16) & 0xF
-
-        piece = PieceType.from_index(piece_val) if piece_val != NONE else None
+        from_sq = extract_source_sq(move_val)
+        to_sq = extract_target_sq(move_val)
+        piece = extract_piece_type(move_val)
+        flag = extract_flag_type(move_val)
 
         return Move(from_sq, to_sq, piece, flag)
 
@@ -1471,6 +1480,7 @@ class Board(BaseBoard):
         else:
             self.set_fen(fen)
         self._handle_moves: MovesStack = MovesStack(self)
+        self._MoveBuf = utils.create_uint32_array(MAX_MOVES)
 
     def clear(self) -> None:
         """Reset the board to starting position and clear move history."""
@@ -1479,9 +1489,8 @@ class Board(BaseBoard):
         self.set_fen(fen=STARTING_FEN)
 
     def _generate_moves(self, func_name: str) -> Iterator[Move]:
-        array: Array[Any] = utils.create_uint32_array(MAX_MOVES)
-        size = cast(int, getattr(chess_lib, func_name)(self.ptr, array))
-        for data in utils.scan_move_list(array[:size]):
+        size = cast(int, getattr(chess_lib, func_name)(self.ptr, self._MoveBuf))
+        for data in utils.scan_move_list(self._MoveBuf[:size]):
             yield Move(*data)
 
     def generate_pseudo_legal_moves(self) -> Iterator[Move]:
