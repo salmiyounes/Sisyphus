@@ -42,7 +42,7 @@
 // Move encoding format (32 bits):
 // from (6 bits) | to (6 bits) | piece (4 bits) | flags (4 bits)
 INLINE Move encode_move(enum Square from, enum Square to,
-                               enum ColoredPiece piece, int flag) {
+                        enum ColoredPiece piece, int flag) {
   return (Move)(((from) | ((to) << 6) | ((piece) << 12) | ((flag) << 16)));
 }
 
@@ -58,12 +58,10 @@ INLINE enum ColoredPiece extract_piece(const Move move) {
   return (enum ColoredPiece)((move >> 12) & 0xf);
 }
 
-INLINE int extract_flags(const Move move) {
-  return (int)((move >> 16) & 0xf);
-}
+INLINE int extract_flags(const Move move) { return (int)((move >> 16) & 0xf); }
 
 INLINE void emit_move(Move **moves, enum Square from, enum Square to,
-                             enum ColoredPiece piece, int flag) {
+                      enum ColoredPiece piece, int flag) {
   *(*moves)++ = encode_move(from, to, piece, flag);
 }
 

@@ -1,7 +1,7 @@
 #include "move.h"
 
 extern Move encode_move(enum Square from, enum Square to,
-                               enum ColoredPiece piece, int flag);
+                        enum ColoredPiece piece, int flag);
 extern enum Square extract_from(const Move move);
 extern enum Square extract_to(const Move move);
 extern enum ColoredPiece extract_piece(const Move move);
