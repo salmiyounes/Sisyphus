@@ -1,6 +1,7 @@
 import logging
 import sys
 import unittest
+import textwrap
 
 import sisyphus
 
@@ -314,6 +315,22 @@ class BaseBoardTestCase(unittest.TestCase):
         board = sisyphus.BaseBoard()
         self.assertEqual(board.color_at(sisyphus.A2), sisyphus.WHITE)
         self.assertEqual(board.color_at(sisyphus.A7), sisyphus.BLACK)
+
+    def test_string_conversion(self):
+        board = sisyphus.BaseBoard()
+
+        self.assertEqual(
+            str(board),
+            textwrap.dedent("""\
+            1 1 1 1 1 1 1 1
+            1 1 1 1 1 1 1 1
+            . . . . . . . .
+            . . . . . . . .
+            . . . . . . . .
+            . . . . . . . .
+            1 1 1 1 1 1 1 1
+            1 1 1 1 1 1 1 1"""),
+        )
 
 
 class SquareSetTestCase(unittest.TestCase):
