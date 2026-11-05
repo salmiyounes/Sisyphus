@@ -1104,9 +1104,23 @@ class BaseBoard:
         return f"{type(self).__name__}({self.occ(BOTH).mask:#021_x})"
 
     def __str__(self) -> str:
-        mask: BitBoard = self.occ(BOTH).mask
-        chess_lib.bb_print(mask)
-        return ""
+        builder: list[str] = []
+        mask = self.occ(BOTH).mask
+
+        for r in range(7, -1, -1):
+            for f in range(8):
+                if utils.test_bit(mask, utils.square(r, f)):
+                    builder.append("1")
+                else:
+                    builder.append(".")
+
+                if f < 7:
+                    builder.append(" ")
+
+            if r > 0:
+                builder.append("\n")
+
+        return "".join(builder)
 
     def __iter__(self) -> Iterator[Square]:
         """Iterate through all occupied squares on the board.
