@@ -24,6 +24,15 @@ static const int INITIAL_PIECES[COLOR_NB][FILE_NB] = {
     {BLACK_ROOK, BLACK_KNIGHT, BLACK_BISHOP, BLACK_QUEEN, BLACK_KING,
      BLACK_BISHOP, BLACK_KNIGHT, BLACK_ROOK}};
 
+static const char CASTLE_CHARS[] = "KQkq";
+
+static const int CASTLE_TABLE[] = {
+    CASTLE_WHITE_KING_SIDE,
+    CASTLE_WHITE_QUEEN_SIDE,
+    CASTLE_BLACK_KING_SIDE,
+    CASTLE_BLACK_QUEEN_SIDE,
+};
+
 void init_table() {
   int pc, p, sq;
   for (p = PAWN, pc = WHITE_PAWN; p <= KING; pc += 2, p++) {
@@ -231,94 +240,65 @@ void sq_to_string(int sq, char *str) {
   *str++ = '\0';
 }
 
-void board_load_fen(ChessBoard *board, const char *fen) {
-  board_clear(board);
+static int fen_to_piece(char ch) {
+  for (int c = 0; c < COLOR_NB; c++) {
+    const char *hit = strchr(PIECE_LABEL[c], ch);
+    if (hit != NULL)
+      return WHITE_PAWN + 2 * (int)(hit - PIECE_LABEL[c]) + c;
+  }
+  return NONE;
+}
 
+void board_load_fen(ChessBoard *board, const char *fen) {
   int rank = 7, file = 0;
-  char ch;
-  char *str = xstrdup(fen), *save_p = NULL;
+  char *str, *save_p = NULL, *token, *p;
+
+  board_clear(board);
+  board->castle = 0;
+
+  str = xstrdup(fen);
   if (str == NULL)
     return;
-  char *token = strtok_r(str, " ", &save_p);
 
-  while ((ch = *token++)) {
-    if (isdigit(ch))
+  token = strtok_r(str, " ", &save_p);
+  if (token == NULL)
+    goto finish;
+
+  for (p = token; *p; p++) {
+    unsigned char ch = (unsigned char)*p;
+    int piece;
+
+    if (isdigit(ch)) {
       file += ch - '0';
-    else if (ch == '/') {
+      continue;
+    }
+    if (ch == '/') {
       file = 0;
       rank--;
-    } else {
-      int piece = NONE;
-      switch (ch) {
-      case 'P':
-        piece = WHITE_PAWN;
-        break;
-      case 'N':
-        piece = WHITE_KNIGHT;
-        break;
-      case 'B':
-        piece = WHITE_BISHOP;
-        break;
-      case 'R':
-        piece = WHITE_ROOK;
-        break;
-      case 'Q':
-        piece = WHITE_QUEEN;
-        break;
-      case 'K':
-        piece = WHITE_KING;
-        break;
-      case 'p':
-        piece = BLACK_PAWN;
-        break;
-      case 'n':
-        piece = BLACK_KNIGHT;
-        break;
-      case 'b':
-        piece = BLACK_BISHOP;
-        break;
-      case 'r':
-        piece = BLACK_ROOK;
-        break;
-      case 'q':
-        piece = BLACK_QUEEN;
-        break;
-      case 'k':
-        piece = BLACK_KING;
-        break;
-      }
-      if (piece != NONE)
-        board_update(board, square(rank, file++), piece);
+      continue;
     }
+
+    piece = fen_to_piece(ch);
+    if (piece == NONE)
+      continue;
+    if (rank < 0 || rank >= RANK_NB || file < 0 || file >= FILE_NB)
+      goto finish;
+
+    board_update(board, square(rank, file++), piece);
   }
 
   token = strtok_r(NULL, " ", &save_p);
-  board->color = token[0] == 'w' ? WHITE : BLACK;
+  if (token == NULL)
+    goto finish;
+  board->color = (token[0] == 'w') ? WHITE : BLACK;
 
-  board->castle = 0;
   token = strtok_r(NULL, " ", &save_p);
-  bool done = false;
-  while ((!done) && (ch = *token++)) {
-    switch (ch) {
-    case 'K':
-      board->castle |= CASTLE_WHITE_KING_SIDE;
-      break;
-    case 'Q':
-      board->castle |= CASTLE_WHITE_QUEEN_SIDE;
-      break;
-    case 'k':
-      board->castle |= CASTLE_BLACK_KING_SIDE;
-      break;
-    case 'q':
-      board->castle |= CASTLE_BLACK_QUEEN_SIDE;
-      break;
-    case '-':
-      done = true;
-      break;
-    case ' ':
-      done = true;
-      break;
-    }
+  if (token == NULL)
+    goto finish;
+  for (p = token; *p; p++) {
+    const char *hit = strchr(CASTLE_CHARS, (unsigned char)*p);
+    if (hit != NULL)
+      board->castle |= CASTLE_TABLE[hit - CASTLE_CHARS];
   }
 
   token = strtok_r(NULL, " ", &save_p);
@@ -328,10 +308,10 @@ void board_load_fen(ChessBoard *board, const char *fen) {
       SET_BIT(board->ep, sq);
   }
 
+finish:
   board->numMoves = 0;
   board->hash = gen_curr_state_zobrist(board);
   board->pawn_hash = gen_pawn_zobrist(board);
-
   free(str);
 }
 

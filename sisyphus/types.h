@@ -8,21 +8,24 @@
 
 // Debug print macro
 #if !defined(DEBUG_DISABLE_PRINT) || defined(DEBUG)
-#define err(...)                                                               \
-  fprintf(stderr, "%s, at %s, line %d\n", __VA_ARGS__, __FILE__, __LINE__);    \
-  fflush(stderr)
-#else
-#define err(...)
-#endif
 
-#if !defined(DEBUG_DISABLE_PRINT) || defined(DEBUG)
+#define err(...)                                                               \
+  do {                                                                         \
+    fprintf(stderr, "%s, at %s, line %d\n", __VA_ARGS__, __FILE__, __LINE__);  \
+    fflush(stderr);                                                            \
+  } while (0)
+
 #define die(...)                                                               \
   do {                                                                         \
     err(__VA_ARGS__);                                                          \
     exit(1);                                                                   \
   } while (0)
+
 #else
-#define die(...)
+
+#define err(...) ((void)0)
+#define die(...) exit(1)
+
 #endif
 
 #define trap() __builtin_trap()
