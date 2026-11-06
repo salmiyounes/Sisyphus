@@ -362,220 +362,198 @@ extractors: list[Callable[[int], Square | PieceType | None | Flags]] = [
 ]
 
 
-class utils:
-    """A collection of static utility methods for chess operations.
+def create_uint32_array(size: int) -> Array[Any]:
+    """Create an array of unsigned 32-bit integers.
 
-    This class provides helper methods for bit manipulation, square coordinates,
-    move encoding and other chess-related calculations.
+    Args:
+        size: The size of the array to create
+
+    Returns:
+        A new uint32 array
     """
+    return (c_uint32 * size)()
 
-    @staticmethod
-    def create_string_buffer(size: int) -> Array[Any]:
-        """Create an array of unsigned 32-bit integers.
 
-        Args:
-            size: The size of the array to create
+def get_lsb(bbit: BitBoard) -> int:
+    """Get the least significant set bit in a bitboard.
 
-        Returns:
-            A new uint32 array
-        """
-        return create_string_buffer(size)
+    Args:
+        bbit: The bitboard to examine
 
-    @staticmethod
-    def create_uint32_array(size: int) -> Array[Any]:
-        """Create an array of unsigned 32-bit integers.
+    Returns:
+        The index of the least significant set bit
+    """
+    return (bbit & -bbit).bit_length() - 1
 
-        Args:
-            size: The size of the array to create
 
-        Returns:
-            A new uint32 array
-        """
-        return (c_uint32 * size)()
+def get_msb(bbit: BitBoard) -> int:
+    """Get the most significant set bit in a bitboard.
 
-    @staticmethod
-    def get_lsb(bbit: BitBoard) -> int:
-        """Get the least significant set bit in a bitboard.
+    Args:
+        bbit: The bitboard to examine
 
-        Args:
-            bbit: The bitboard to examine
+    Returns:
+        The index of the most significant set bit
+    """
+    return bbit.bit_length() - 1
 
-        Returns:
-            The index of the least significant set bit
-        """
-        return cast(int, chess_lib.get_lsb(bbit))
 
-    @staticmethod
-    def get_msb(bbit: BitBoard) -> int:
-        """Get the most significant set bit in a bitboard.
+def popcount(bbit: BitBoard) -> int:
+    """Count the number of set bits in a bitboard.
 
-        Args:
-            bbit: The bitboard to examine
+    Args:
+        bbit: The bitboard to count bits in
 
-        Returns:
-            The index of the most significant set bit
-        """
-        return cast(int, chess_lib.get_msb(bbit))
+    Returns:
+        The number of set bits
+    """
+    return cast(int, chess_lib.popcount(bbit))
 
-    @staticmethod
-    def popcount(bbit: BitBoard) -> int:
-        """Count the number of set bits in a bitboard.
 
-        Args:
-            bbit: The bitboard to count bits in
+def test_bit(bbit: BitBoard, sq: Square) -> bool:
+    """Test if a specific bit is set in a bitboard.
 
-        Returns:
-            The number of set bits
-        """
-        return cast(int, chess_lib.popcount(bbit))
+    Args:
+        bbit: The bitboard to test
+        sq: The square index to check
 
-    @staticmethod
-    def test_bit(bbit: BitBoard, sq: Square) -> bool:
-        """Test if a specific bit is set in a bitboard.
+    Returns:
+        True if the bit is set, False otherwise
+    """
+    return cast(bool, chess_lib.test_bit(bbit, sq))
 
-        Args:
-            bbit: The bitboard to test
-            sq: The square index to check
 
-        Returns:
-            True if the bit is set, False otherwise
-        """
-        return cast(bool, chess_lib.test_bit(bbit, sq))
+def make_square(rank: Square, file: Square) -> Square:
+    """Convert rank and file coordinates to a square index.
 
-    @staticmethod
-    def square(rank: Square, file: Square) -> Square:
-        """Convert rank and file coordinates to a square index.
+    Args:
+        rank: The rank coordinate (0-7)
+        file: The file coordinate (0-7)
 
-        Args:
-            rank: The rank coordinate (0-7)
-            file: The file coordinate (0-7)
+    Returns:
+        The square index (0-63)
+    """
+    return rank * 8 + file
 
-        Returns:
-            The square index (0-63)
-        """
-        return cast(Square, chess_lib.square(rank, file))
 
-    @staticmethod
-    def file_of(sq: Square) -> int:
-        """Get the file of a square.
+def file_of(sq: Square) -> int:
+    """Get the file of a square.
 
-        Args:
-            sq: The square index
+    Args:
+        sq: The square index
 
-        Returns:
-            The file number (0-7)
-        """
-        return cast(int, chess_lib.file_of(sq))
+    Returns:
+        The file number (0-7)
+    """
+    return sq & 7
 
-    @staticmethod
-    def rank_of(sq: Square) -> int:
-        """Get the rank of a square.
 
-        Args:
-            sq: The square index
+def rank_of(sq: Square) -> int:
+    """Get the rank of a square.
 
-        Returns:
-            The rank number (0-7)
-        """
-        return cast(int, chess_lib.rank_of(sq))
+    Args:
+        sq: The square index
 
-    @staticmethod
-    def bit(sq: Square) -> int:
-        """Convert a square index to a bitboard with only that bit set.
+    Returns:
+        The rank number (0-7)
+    """
+    return sq >> 3
 
-        Args:
-            sq: The square index
 
-        Returns:
-            A bitboard with only the specified bit set
-        """
-        return 1 << sq
+def bit(sq: Square) -> int:
+    """Convert a square index to a bitboard with only that bit set.
 
-    @staticmethod
-    def scan_forward(bb: BitBoard) -> Iterator[Square]:
-        """Iterate through set bits in a bitboard from LSB to MSB.
+    Args:
+        sq: The square index
 
-        Args:
-            bb: The bitboard to scan
+    Returns:
+        A bitboard with only the specified bit set
+    """
+    return 1 << sq
 
-        Yields:
-            Square indices of set bits
-        """
-        while bb:
-            r = bb & -bb
-            yield r.bit_length() - 1
-            bb ^= r
 
-    @staticmethod
-    def square_distance(a: Square, b: Square) -> int:
-        """Calculate the Chebyshev distance between two squares.
+def scan_forward(bb: BitBoard) -> Iterator[Square]:
+    """Iterate through set bits in a bitboard from LSB to MSB.
 
-        Args:
-            a: First square index
-            b: Second square index
+    Args:
+        bb: The bitboard to scan
 
-        Returns:
-            The number of king moves needed to go from a to b
-        """
-        return max(
-            abs(utils.file_of(a) - utils.file_of(b)),
-            abs(utils.rank_of(a) - utils.rank_of(b)),
-        )
+    Yields:
+        Square indices of set bits
+    """
+    while bb:
+        r = bb & -bb
+        yield r.bit_length() - 1
+        bb ^= r
 
-    @staticmethod
-    def square_manhattan_distance(a: Square, b: Square) -> int:
-        """Calculate the Manhattan distance between two squares.
 
-        Args:
-            a: First square index
-            b: Second square index
+def square_distance(a: Square, b: Square) -> int:
+    """Calculate the Chebyshev distance between two squares.
 
-        Returns:
-            The sum of horizontal and vertical distances
-        """
-        return abs(utils.file_of(a) - utils.file_of(b)) + abs(
-            utils.rank_of(a) - utils.rank_of(b)
-        )
+    Args:
+        a: First square index
+        b: Second square index
 
-    @staticmethod
-    def square_mirror(square: Square) -> Square:
-        """Mirror a square vertically on the board.
+    Returns:
+        The number of king moves needed to go from a to b
+    """
+    return max(
+        abs(file_of(a) - file_of(b)),
+        abs(rank_of(a) - rank_of(b)),
+    )
 
-        Args:
-            square: The square index to mirror
 
-        Returns:
-            The mirrored square index
-        """
-        return square ^ 56
+def square_manhattan_distance(a: Square, b: Square) -> int:
+    """Calculate the Manhattan distance between two squares.
 
-    @staticmethod
-    def encode_move(from_sq: int, to_sq: int, piece: int, flag: int) -> int:
-        """Encode move information into a single integer.
+    Args:
+        a: First square index
+        b: Second square index
 
-        Args:
-            from_sq: Source square (0-63)
-            to_sq: Target square (0-63)
-            piece: Piece type and color
-            flag: Move flags (castling, en passant, promotion)
+    Returns:
+        The sum of horizontal and vertical distances
+    """
+    return abs(file_of(a) - file_of(b)) + abs(rank_of(a) - rank_of(b))
 
-        Returns:
-            Encoded move as a 32-bit integer
-        """
-        return cast(int, chess_lib.encode_move(from_sq, to_sq, piece, flag))
 
-    @staticmethod
-    def scan_move_list(arr: list[int]) -> Iterator[list[Any]]:
-        """Convert a list of encoded moves into move components.
+def square_mirror(square: Square) -> Square:
+    """Mirror a square vertically on the board.
 
-        Args:
-            arr: List of encoded move integers
+    Args:
+        square: The square index to mirror
 
-        Yields:
-            Lists containing [source square, target square, piece type, flags]
-        """
-        for m in arr:
-            yield [extr(m) for extr in extractors]
+    Returns:
+        The mirrored square index
+    """
+    return square ^ 56
+
+
+def encode_move(from_sq: int, to_sq: int, piece: int, flag: int) -> int:
+    """Encode move information into a single integer.
+
+    Args:
+        from_sq: Source square (0-63)
+        to_sq: Target square (0-63)
+        piece: Piece type and color
+        flag: Move flags (castling, en passant, promotion)
+
+    Returns:
+        Encoded move as a 32-bit integer
+    """
+    return (from_sq | (to_sq << 6) | (piece << 12) | (flag << 16)) & 0xFFFFFFFF
+
+
+def scan_move_list(arr: list[int]) -> Iterator[list[Any]]:
+    """Convert a list of encoded moves into move components.
+
+    Args:
+        arr: List of encoded move integers
+
+    Yields:
+        Lists containing [source square, target square, piece type, flags]
+    """
+    for m in arr:
+        yield [extr(m) for extr in extractors]
 
 
 @dataclasses.dataclass
@@ -745,7 +723,7 @@ class Move:
         Returns:
             int: Unique hash value for this move
         """
-        return utils.encode_move(
+        return encode_move(
             self.from_sq, self.dst_sq, hash(self.piece) if self.piece else 0, self.flag
         )
 
@@ -902,7 +880,7 @@ class SquareSet:
         Returns:
             Number of bits set to 1 in the bitboard
         """
-        return int(utils.popcount(self.mask))
+        return int(popcount(self.mask))
 
     def __str__(self) -> str:
         """Print an ASCII representation of the bitboard.
@@ -935,7 +913,7 @@ class SquareSet:
         return self.mask
 
     def __iter__(self) -> Iterator[Square]:
-        return utils.scan_forward(self.mask)
+        return scan_forward(self.mask)
 
     def __bool__(self) -> bool:
         return bool(self.mask)
@@ -947,7 +925,7 @@ class SquareSet:
             return NotImplemented
 
     def __contains__(self, sq: Square) -> bool:
-        return bool(utils.bit(sq) & int(self))
+        return bool(bit(sq) & int(self))
 
     def pop(self) -> Square:
         """Remove and return the least significant set square.
@@ -960,7 +938,7 @@ class SquareSet:
         """
         if not self.mask:
             raise KeyError("pop from empty SquareSet")
-        square: Square = utils.get_lsb(self.mask)
+        square: Square = get_lsb(self.mask)
         self.mask &= self.mask - 1
         return square
 
@@ -1110,7 +1088,7 @@ class BaseBoard:
 
         for r in range(7, -1, -1):
             for f in range(8):
-                if utils.test_bit(mask, utils.square(r, f)):
+                if test_bit(mask, make_square(r, f)):
                     builder.append("1")
                 else:
                     builder.append(".")
@@ -1130,7 +1108,7 @@ class BaseBoard:
             Square: Index of each occupied square (0-63)
         """
         mask: BitBoard = self.occ(BOTH).mask
-        return utils.scan_forward(mask)
+        return scan_forward(mask)
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, BaseBoard):
@@ -1218,7 +1196,7 @@ class BaseBoard:
                 f"Invalid color value: {color}. Must be WHITE (0), BLACK (1) or BOTH (2)"
             )
         mask: BitBoard = self.kings(color).mask
-        return utils.get_lsb(mask)
+        return get_lsb(mask)
 
     def piece_at(self, square: Square) -> PieceType | None:
         """Get the piece at a given square.
@@ -1247,7 +1225,7 @@ class BaseBoard:
             Optional[Color]: WHITE (0) or BLACK (1) if a piece is present,
                             None if the square is empty
         """
-        mask: BitBoard = utils.bit(square)
+        mask: BitBoard = bit(square)
         if self.occ(WHITE).mask & mask:
             return WHITE
         elif self.occ(BLACK).mask & mask:
@@ -1296,7 +1274,7 @@ class BaseBoard:
         chess_lib.print_board(self.ptr)
 
     def board_to_fen(self) -> str:
-        buffer: Array[c_char] = utils.create_string_buffer(256)
+        buffer: Array[c_char] = create_string_buffer(256)
         chess_lib.board_to_fen(self.ptr, buffer)
         return buffer.value.decode("utf-8")
 
@@ -1423,7 +1401,7 @@ class MoveUndo:
                             or None if not an en passant capture
         """
         if self._move and self._move.is_enp():
-            return utils.get_lsb(self.undo.ep)
+            return get_lsb(self.undo.ep)
         return None
 
     @property
@@ -1480,7 +1458,7 @@ class Board(BaseBoard):
         else:
             self.set_fen(fen)
         self._handle_moves: MovesStack = MovesStack(self)
-        self._MoveBuf = utils.create_uint32_array(MAX_MOVES)
+        self._MoveBuf = create_uint32_array(MAX_MOVES)
 
     def clear(self) -> None:
         """Reset the board to starting position and clear move history."""
@@ -1490,7 +1468,7 @@ class Board(BaseBoard):
 
     def _generate_moves(self, func_name: str) -> Iterator[Move]:
         size = cast(int, getattr(chess_lib, func_name)(self.ptr, self._MoveBuf))
-        for data in utils.scan_move_list(self._MoveBuf[:size]):
+        for data in scan_move_list(self._MoveBuf[:size]):
             yield Move(*data)
 
     def generate_pseudo_legal_moves(self) -> Iterator[Move]:
@@ -1779,7 +1757,7 @@ class Board(BaseBoard):
             builder.append(f"{rank + 1} ")
 
             for file in range(8):
-                square = utils.square(rank, file)
+                square = make_square(rank, file)
                 piece = self.piece_at(square)
 
                 if piece:

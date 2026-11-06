@@ -15,37 +15,37 @@ class RaiseLogHandler(logging.StreamHandler):
 class UtilsTestCase(unittest.TestCase):
     def test_square(self):
         for square in list(range(sisyphus.SQUARE_NB)):
-            file_sq = sisyphus.utils.file_of(square)
-            rank_of = sisyphus.utils.rank_of(square)
-            self.assertEqual(sisyphus.utils.square(rank_of, file_sq), square)
+            file_sq = sisyphus.file_of(square)
+            rank_of = sisyphus.rank_of(square)
+            self.assertEqual(sisyphus.make_square(rank_of, file_sq), square)
 
     def test_bit_operations(self):
-        bb = sisyphus.utils.bit(sisyphus.C2)
-        self.assertEqual(sisyphus.utils.get_lsb(bb), 10)
-        self.assertEqual(sisyphus.utils.popcount(bb), 1)
-        self.assertTrue(sisyphus.utils.test_bit(bb, 10))
-        self.assertFalse(sisyphus.utils.test_bit(bb, 11))
+        bb = sisyphus.bit(sisyphus.C2)
+        self.assertEqual(sisyphus.get_lsb(bb), 10)
+        self.assertEqual(sisyphus.popcount(bb), 1)
+        self.assertTrue(sisyphus.test_bit(bb, 10))
+        self.assertFalse(sisyphus.test_bit(bb, 11))
 
     def test_square_distances(self):
-        self.assertEqual(sisyphus.utils.square_distance(sisyphus.A1, sisyphus.H8), 7)
-        self.assertEqual(sisyphus.utils.square_distance(sisyphus.E4, sisyphus.E5), 1)
+        self.assertEqual(sisyphus.square_distance(sisyphus.A1, sisyphus.H8), 7)
+        self.assertEqual(sisyphus.square_distance(sisyphus.E4, sisyphus.E5), 1)
         self.assertEqual(
-            sisyphus.utils.square_manhattan_distance(sisyphus.A1, sisyphus.H8), 14
+            sisyphus.square_manhattan_distance(sisyphus.A1, sisyphus.H8), 14
         )
         self.assertEqual(
-            sisyphus.utils.square_manhattan_distance(sisyphus.E4, sisyphus.E5), 1
+            sisyphus.square_manhattan_distance(sisyphus.E4, sisyphus.E5), 1
         )
 
     def test_scan_forward(self):
         bb = (1 << sisyphus.A1) | (1 << sisyphus.C3) | (1 << sisyphus.H8)
-        squares = list(sisyphus.utils.scan_forward(bb))
+        squares = list(sisyphus.scan_forward(bb))
         self.assertEqual(squares, [sisyphus.A1, sisyphus.C3, sisyphus.H8])
 
     def test_file_and_rank(self):
-        self.assertEqual(sisyphus.utils.file_of(sisyphus.E4), 4)
-        self.assertEqual(sisyphus.utils.rank_of(sisyphus.E4), 3)
-        self.assertEqual(sisyphus.utils.file_of(sisyphus.H8), 7)
-        self.assertEqual(sisyphus.utils.rank_of(sisyphus.H8), 7)
+        self.assertEqual(sisyphus.file_of(sisyphus.E4), 4)
+        self.assertEqual(sisyphus.rank_of(sisyphus.E4), 3)
+        self.assertEqual(sisyphus.file_of(sisyphus.H8), 7)
+        self.assertEqual(sisyphus.rank_of(sisyphus.H8), 7)
 
 
 class BoardTestCase(unittest.TestCase):
@@ -335,20 +335,20 @@ class BaseBoardTestCase(unittest.TestCase):
 
 class SquareSetTestCase(unittest.TestCase):
     def test_len(self):
-        mask = sisyphus.utils.bit(sisyphus.A1) | sisyphus.utils.bit(sisyphus.B1)
+        mask = sisyphus.bit(sisyphus.A1) | sisyphus.bit(sisyphus.B1)
         a1 = sisyphus.SquareSet(mask)
         self.assertTrue(bool(a1))
         self.assertEqual(len(a1), 2)
 
     def test_contains(self):
-        mask = sisyphus.utils.bit(sisyphus.A5)
+        mask = sisyphus.bit(sisyphus.A5)
         a1 = sisyphus.SquareSet(mask)
 
         self.assertTrue(sisyphus.A5 in a1)
         self.assertFalse(sisyphus.B1 in a1)
 
     def test_pop(self):
-        mask = sisyphus.utils.bit(sisyphus.A5)
+        mask = sisyphus.bit(sisyphus.A5)
         a1 = sisyphus.SquareSet(mask)
 
         self.assertEqual(a1.pop(), sisyphus.A5)
