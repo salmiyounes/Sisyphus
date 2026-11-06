@@ -13,3 +13,9 @@ def lint(session):
     session.install("ruff", "codespell")
     session.run("ruff", "check", ".")
     session.run("codespell", "sisyphus", "tests", "README.rst")
+
+
+@nox.session
+def bench(session):
+    session.install(".", "python-chess")
+    session.run("python", "benchmarks/bench.py")
