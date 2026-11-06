@@ -55,10 +55,11 @@ void board_clear(ChessBoard *board) {
     board->squares[sq] = NONE;
 
   board->castle = CASTLE_ALL;
-  castling_rights[0] = CASTLE_WHITE_QUEEN_SIDE;
-  castling_rights[7] = CASTLE_WHITE_KING_SIDE;
-  castling_rights[56] = CASTLE_BLACK_QUEEN_SIDE;
-  castling_rights[63] = CASTLE_BLACK_KING_SIDE;
+
+  const enum Square castling_sq[] = {H1, A1, H8, A8};
+
+  for (int i = 0; i < ARRAY_SIZE(castling_sq); i++)
+    castling_rights[castling_sq[i]] = CASTLE_TABLE[i];
 
   board->hash = EMPTY_BB;
   board->pawn_hash = EMPTY_BB;
