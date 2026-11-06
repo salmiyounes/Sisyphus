@@ -38,7 +38,6 @@ from ctypes import (
     c_int,
     c_uint32,
     c_uint64,
-    c_void_p,
     create_string_buffer,
     pointer,
 )
@@ -244,9 +243,9 @@ chess_lib.file_of.restype = c_int
 chess_lib.rank_of.argtypes = [c_int]
 chess_lib.rank_of.restype = c_int
 chess_lib.bb_init.argtypes = []
-chess_lib.bb_init.restype = c_void_p
+chess_lib.bb_init.restype = None
 chess_lib.bb_print.argtypes = [c_uint64]
-chess_lib.bb_print.restype = c_void_p
+chess_lib.bb_print.restype = None
 chess_lib.bb_attacks_to_king_square.argtypes = [POINTER(ChessBoard), c_uint64]
 chess_lib.bb_attacks_to_king_square.restype = c_int
 chess_lib.bb_attacks_to_square.argtypes = [POINTER(ChessBoard), c_int, c_uint64]
@@ -254,17 +253,17 @@ chess_lib.bb_attacks_to_square.restype = c_uint64
 
 # Main board functions
 chess_lib.board_init.argtypes = [POINTER(ChessBoard)]
-chess_lib.board_init.restype = c_void_p
+chess_lib.board_init.restype = None
 chess_lib.board_load_fen.argtypes = [POINTER(ChessBoard), POINTER(c_char)]
-chess_lib.board_load_fen.restype = c_void_p
+chess_lib.board_load_fen.restype = None
 chess_lib.print_board.argtypes = [POINTER(ChessBoard)]
-chess_lib.print_board.restype = c_void_p
+chess_lib.print_board.restype = None
 chess_lib.board_to_fen.argtypes = [POINTER(ChessBoard), POINTER(c_char)]
-chess_lib.board_to_fen.restype = c_void_p
+chess_lib.board_to_fen.restype = None
 chess_lib.perft_test.argtypes = [POINTER(ChessBoard), c_int]
 chess_lib.perft_test.restype = c_uint64
 chess_lib.board_clear.argtypes = [POINTER(ChessBoard)]
-chess_lib.board_clear.restype = c_void_p
+chess_lib.board_clear.restype = None
 chess_lib.board_drawn_by_insufficient_material.argtypes = [POINTER(ChessBoard), c_int]
 chess_lib.board_drawn_by_insufficient_material.restype = c_bool
 
@@ -297,9 +296,9 @@ chess_lib.is_valid.restype = c_bool
 
 # Move Handling functions
 chess_lib.do_move.argtypes = [POINTER(ChessBoard), c_uint32, POINTER(Undo)]
-chess_lib.do_move.restype = c_void_p
+chess_lib.do_move.restype = None
 chess_lib.undo_move.argtypes = [POINTER(ChessBoard), c_uint32, POINTER(Undo)]
-chess_lib.undo_move.restype = c_void_p
+chess_lib.undo_move.restype = None
 chess_lib.move_to_str.argtypes = [c_uint32]
 chess_lib.move_to_str.restype = c_char_p
 chess_lib.make_move.argtypes = [POINTER(ChessBoard), c_uint32]
@@ -316,6 +315,10 @@ chess_lib.extract_flags.argtypes = [c_uint32]
 chess_lib.extract_flags.restype = c_uint32
 chess_lib.encode_move.argtypes = [c_int, c_int, c_int, c_int]
 chess_lib.encode_move.restype = c_int
+chess_lib.do_null_move_pruning.argtypes = [POINTER(ChessBoard), POINTER(Undo)]
+chess_lib.do_null_move_pruning.restype = None
+chess_lib.undo_null_move_pruning.argtypes = [POINTER(ChessBoard), POINTER(Undo)]
+chess_lib.undo_null_move_pruning.restype = None
 
 # Search and functions
 chess_lib.thread_init.argtypes = [
@@ -325,9 +328,9 @@ chess_lib.thread_init.argtypes = [
     c_float,
     c_bool,
 ]
-chess_lib.thread_init.restype = c_void_p
+chess_lib.thread_init.restype = None
 chess_lib.thread_stop.argtypes = [POINTER(Search)]
-chess_lib.thread_stop.restype = c_void_p
+chess_lib.thread_stop.restype = None
 chess_lib.best_move.argtypes = [POINTER(Search), POINTER(ChessBoard), POINTER(c_uint32)]
 chess_lib.best_move.restype = c_int
 
@@ -800,7 +803,7 @@ class Move:
                            or None if this is not a promotion move
         """
         if self.is_promotion():
-            return (self.flag & 0x3) + KNIGHT
+            return (self.flag & 0x3) + 1
         else:
             return None
 
@@ -1119,6 +1122,9 @@ class BaseBoard:
             and self.baseboard.ep == other.baseboard.ep
             and all(self.piece_at(sq) == other.piece_at(sq) for sq in range(SQUARE_NB))
         )
+
+    def __hash__(self) -> int:
+        return self.zobrist_key()
 
     def board_init(self) -> None:
         """Initialize the board's bitboards and other internal state.
@@ -1697,10 +1703,10 @@ class Board(BaseBoard):
         """Push a null move this will just flip the color
         and update the zobrist hash.
         """
-        return
+        self._handle_moves.push_null()
 
-    def pop_null(self) -> Move:
-        return cast(Move, NotImplemented)
+    def pop_null(self) -> None:
+        self._handle_moves.pop_null()
 
     def peek(self) -> Move | None:
         return self._handle_moves.peek()
@@ -1796,7 +1802,7 @@ class Board(BaseBoard):
         self.unicode_print()
 
     def __hash__(self) -> int:
-        return self.zobrist_key()
+        return super().__hash__()
 
 
 class PseudoLegalMoveGenerator:
@@ -1858,6 +1864,10 @@ class MovesStack:
         self._moves_history.append((move, undo))
 
     def pop(self) -> Move:
+        if not self._moves_history:
+            raise IndexError("pop from empty move history")
+        if self.peek() == Move.null():
+            raise ValueError("last move is a null move, use pop_null()")
         if len(self):
             move, undo = self._moves_history.pop()
         else:
@@ -1865,6 +1875,23 @@ class MovesStack:
 
         chess_lib.undo_move(self.board.ptr, hash(move), undo.ptr)
         return move
+
+    def push_null(self) -> None:
+        undo = MoveUndo()
+        chess_lib.do_null_move_pruning(self.board.ptr, undo.ptr)
+        self._moves_history.append((Move.null(), undo))
+
+    def pop_null(self) -> None:
+        if not self._moves_history:
+            raise IndexError("pop from empty move history")
+        if self.peek() != Move.null():
+            raise ValueError("last move is not a null move")
+        if len(self):
+            _, undo = self._moves_history.pop()
+        else:
+            raise IndexError("pop from empty move history")
+
+        chess_lib.undo_null_move_pruning(self.board.ptr, undo.ptr)
 
     def peek(self) -> Move | None:
         return self._moves_history[-1][0] if self._moves_history else None
