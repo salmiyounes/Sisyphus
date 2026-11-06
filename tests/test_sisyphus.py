@@ -275,6 +275,63 @@ class BoardTestCase(unittest.TestCase):
 
         self.assertEqual(board.peek(), None)
 
+    def test_null_move_round_trip(self):
+        fens = [
+            sisyphus.STARTING_FEN,
+            "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4",
+            # En passant square must be cleared by the null move and restored by the undo.
+            "4k3/8/8/8/4pPp1/8/8/4K3 b - f3 0 1",
+        ]
+        for fen in fens:
+            with self.subTest(fen=fen):
+                board = sisyphus.Board(fen)
+                fen_before = board.fen
+                key_before = board.zobrist_key()
+                turn_before = board.turn
+
+                board.push_null()
+                self.assertNotEqual(board.turn, turn_before)
+                self.assertNotEqual(board.zobrist_key(), key_before)
+                self.assertEqual(board.peek(), sisyphus.Move.null())
+                self.assertEqual(len(board._handle_moves), 1)
+
+                board.pop_null()
+                self.assertEqual(board.turn, turn_before)
+                self.assertEqual(board.fen, fen_before)
+                self.assertEqual(board.zobrist_key(), key_before)
+                self.assertEqual(len(board._handle_moves), 0)
+
+    def test_null_move_with_real_move(self):
+        board = sisyphus.Board()
+        fen_before = board.fen
+        key_before = board.zobrist_key()
+
+        board.push_null()
+        move = next(iter(board.gen_legal_moves))
+        board.push(move)
+        board.pop()
+        board.pop_null()
+
+        self.assertEqual(board.fen, fen_before)
+        self.assertEqual(board.zobrist_key(), key_before)
+
+    def test_pop_null_empty(self):
+        board = sisyphus.Board()
+        with self.assertRaises(IndexError):
+            board.pop_null()
+
+    def test_pop_mismatch(self):
+        # pop() must not unmake a null move, and pop_null() must not unmake a real move.
+        board = sisyphus.Board()
+        board.push_null()
+        with self.assertRaises(ValueError):
+            board.pop()
+        board.pop_null()
+
+        board.push(next(iter(board.gen_legal_moves)))
+        with self.assertRaises(ValueError):
+            board.pop_null()
+
 
 class BaseBoardTestCase(unittest.TestCase):
     def test_equal(self):
