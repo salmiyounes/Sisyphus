@@ -476,6 +476,68 @@ class PiecTypeTestCase(unittest.TestCase):
         self.assertEqual(sisyphus.PieceType.from_symbol("Q"), piece)
 
 
+class BoardToFenTestCase(unittest.TestCase):
+    def test_returns_string(self):
+        self.assertIsInstance(sisyphus.Board().board_to_fen(), str)
+
+    def test_starting_position(self):
+        board = sisyphus.Board()
+        self.assertEqual(board.board_to_fen(), sisyphus.STARTING_FEN)
+
+    def test_matches_fen_property(self):
+        board = sisyphus.Board()
+        self.assertEqual(board.board_to_fen(), board.fen)
+
+    def test_custom_position(self):
+        fen = "6k1/pb3pp1/1p2p2p/1Bn1P3/8/5N2/PP1q1PPP/6K1 w - -"
+        board = sisyphus.Board(fen)
+        self.assertEqual(board.board_to_fen(), fen)
+
+    def test_black_to_move(self):
+        fen = "4k3/8/8/8/8/8/8/4K3 b - -"
+        self.assertEqual(sisyphus.Board(fen).board_to_fen(), fen)
+
+    def test_no_castling_rights(self):
+        fen = "r3k2r/8/8/8/8/8/8/R3K2R w - -"
+        self.assertEqual(sisyphus.Board(fen).board_to_fen(), fen)
+
+    def test_partial_castling_rights(self):
+        fen = "r3k2r/8/8/8/8/8/8/R3K2R w Kq -"
+        self.assertEqual(sisyphus.Board(fen).board_to_fen(), fen)
+
+    def test_en_passant_square(self):
+        fen = "4k3/8/8/8/4pPp1/8/8/4K3 b - f3"
+        self.assertEqual(sisyphus.Board(fen).board_to_fen(), fen)
+
+    def test_after_moves(self):
+        board = sisyphus.Board()
+        for uci in ["e2e4", "e7e5", "g1f3", "g8f6"]:
+            board.push(sisyphus.Move.parse_uci(board, uci))
+        self.assertEqual(
+            board.board_to_fen(),
+            "rnbqkb1r/pppp1ppp/5n2/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq -",
+        )
+
+    def test_after_push_and_pop(self):
+        board = sisyphus.Board()
+        before = board.board_to_fen()
+        board.push(sisyphus.Move.parse_uci(board, "e2e4"))
+        self.assertNotEqual(board.board_to_fen(), before)
+        board.pop()
+        self.assertEqual(board.board_to_fen(), before)
+
+    def test_output_can_be_loaded_again(self):
+        board = sisyphus.Board("r3k2r/8/8/8/8/8/8/R3K2R w KQkq -")
+        fen = board.board_to_fen()
+        self.assertEqual(sisyphus.Board(fen).board_to_fen(), fen)
+
+    def test_does_not_change_the_board(self):
+        board = sisyphus.Board()
+        first = board.board_to_fen()
+        second = board.board_to_fen()
+        self.assertEqual(first, second)
+
+
 if __name__ == "__main__":
     verbosity = sum(
         arg.count("v") for arg in sys.argv if all(c == "v" for c in arg.lstrip("-"))
