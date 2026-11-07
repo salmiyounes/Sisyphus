@@ -67,8 +67,8 @@ void board_clear(ChessBoard *board) {
   board->eg[WHITE] = board->eg[BLACK] = 0;
 }
 
-INLINE void __board_remove_piece(ChessBoard *board, enum Square sq,
-                                 enum ColoredPiece prev) {
+INLINE void board_remove_piece(ChessBoard *board, enum Square sq,
+                               enum ColoredPiece prev) {
   CLEAR_BIT(board->occ[BOTH], sq);
   CLEAR_BIT(board->bb_squares[prev], sq);
   if (piece_color(prev))
@@ -82,8 +82,8 @@ INLINE void __board_remove_piece(ChessBoard *board, enum Square sq,
   board->gamePhase -= gamephaseInc[prev];
 }
 
-INLINE void __board_set_piece(ChessBoard *board, enum Square sq,
-                              enum ColoredPiece piece) {
+INLINE void board_set_piece(ChessBoard *board, enum Square sq,
+                            enum ColoredPiece piece) {
   SET_BIT(board->occ[BOTH], sq);
   SET_BIT(board->bb_squares[piece], sq);
   if (piece_color(piece))
@@ -118,7 +118,7 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   case BLACK_QUEEN:
   case WHITE_KING:
   case BLACK_KING:
-    __board_remove_piece(board, sq, prev);
+    board_remove_piece(board, sq, prev);
     break;
   case NONE:
     break;
@@ -139,7 +139,7 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   case BLACK_QUEEN:
   case WHITE_KING:
   case BLACK_KING:
-    __board_set_piece(board, sq, piece);
+    board_set_piece(board, sq, piece);
     break;
   case NONE:
     break;
@@ -343,15 +343,10 @@ void board_to_fen(ChessBoard *board, char *fen) {
   *fen++ = ' ';
 
   if (board->castle) {
-    if (board->castle & CASTLE_WHITE_KING_SIDE)
-      *fen++ = 'K';
-    if (board->castle & CASTLE_WHITE_QUEEN_SIDE)
-      *fen++ = 'Q';
-    if (board->castle & CASTLE_BLACK_KING_SIDE)
-      *fen++ = 'k';
-    if (board->castle & CASTLE_BLACK_QUEEN_SIDE)
-      *fen++ = 'q';
-
+    for (int i = 0; i < ARRAY_SIZE(CASTLE_TABLE); i++) {
+      if (board->castle & CASTLE_TABLE[i])
+        *fen++ = CASTLE_CHARS[i];
+    }
   } else
     *fen++ = '-';
 

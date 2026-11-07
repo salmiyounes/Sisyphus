@@ -31,9 +31,9 @@ const char *SQ_TO_COORD[64] = {
 
 // Helper functions for special moves
 
-static INLINE void _handle_white_pawn(ChessBoard *board, enum Square src,
-                                      enum Square dst, const int flag,
-                                      enum Color color) {
+static INLINE void handle_white_pawn(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag,
+                                     enum Color color) {
   bb bsrc = BIT(src);
   bb bdst = BIT(dst);
   if ((bsrc & RANK_2) && (bdst & RANK_4))
@@ -46,16 +46,16 @@ static INLINE void _handle_white_pawn(ChessBoard *board, enum Square src,
     place_promo_piece(board, dst, flag, color);
 }
 
-static INLINE void _unmake_white_pawn(ChessBoard *board, enum Square dst,
-                                      const int flag) {
+static INLINE void unmake_white_pawn(ChessBoard *board, enum Square dst,
+                                     const int flag) {
   if (!IS_ENP(flag))
     return;
   board_update(board, dst - 8, BLACK_PAWN);
 }
 
-static INLINE void _handle_black_pawn(ChessBoard *board, enum Square src,
-                                      enum Square dst, const int flag,
-                                      enum Color color) {
+static INLINE void handle_black_pawn(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag,
+                                     enum Color color) {
   bb bsrc = BIT(src);
   bb bdst = BIT(dst);
   if ((bsrc & RANK_7) && (bdst & RANK_5))
@@ -68,15 +68,15 @@ static INLINE void _handle_black_pawn(ChessBoard *board, enum Square src,
     place_promo_piece(board, dst, flag, color);
 }
 
-static INLINE void _unmake_black_pawn(ChessBoard *board, enum Square dst,
-                                      const int flag) {
+static INLINE void unmake_black_pawn(ChessBoard *board, enum Square dst,
+                                     const int flag) {
   if (!IS_ENP(flag))
     return;
   board_update(board, dst + 8, WHITE_PAWN);
 }
 
-static INLINE void _handle_white_king(ChessBoard *board, enum Square src,
-                                      enum Square dst, const int flag) {
+static INLINE void handle_white_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
   board->castle &= ~CASTLE_WHITE;
 
   if (!IS_CAS(flag))
@@ -91,8 +91,8 @@ static INLINE void _handle_white_king(ChessBoard *board, enum Square src,
   }
 }
 
-static INLINE void _unmake_white_king(ChessBoard *board, enum Square src,
-                                      enum Square dst, const int flag) {
+static INLINE void unmake_white_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
   if (!IS_CAS(flag))
     return;
 
@@ -105,8 +105,8 @@ static INLINE void _unmake_white_king(ChessBoard *board, enum Square src,
   }
 }
 
-static INLINE void _handle_black_king(ChessBoard *board, enum Square src,
-                                      enum Square dst, const int flag) {
+static INLINE void handle_black_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
   board->castle &= ~CASTLE_BLACK;
 
   if (!IS_CAS(flag))
@@ -121,8 +121,8 @@ static INLINE void _handle_black_king(ChessBoard *board, enum Square src,
   }
 }
 
-static INLINE void _unmake_black_king(ChessBoard *board, enum Square src,
-                                      enum Square dst, const int flag) {
+static INLINE void unmake_black_king(ChessBoard *board, enum Square src,
+                                     enum Square dst, const int flag) {
   if (!IS_CAS(flag))
     return;
 
@@ -182,18 +182,18 @@ void do_move(ChessBoard *board, Move move, Undo *undo) {
   case NONE:
     break;
   case WHITE_PAWN: {
-    _handle_white_pawn(board, src, dst, flag, color);
+    handle_white_pawn(board, src, dst, flag, color);
     break;
   }
   case BLACK_PAWN: {
-    _handle_black_pawn(board, src, dst, flag, color);
+    handle_black_pawn(board, src, dst, flag, color);
     break;
   }
   case WHITE_KING:
-    _handle_white_king(board, src, dst, flag);
+    handle_white_king(board, src, dst, flag);
     break;
   case BLACK_KING:
-    _handle_black_king(board, src, dst, flag);
+    handle_black_king(board, src, dst, flag);
     break;
   default:
     trap();
@@ -239,16 +239,16 @@ void undo_move(ChessBoard *board, Move move, Undo *undo) {
   case NONE:
     break;
   case WHITE_PAWN:
-    _unmake_white_pawn(board, dst, flag);
+    unmake_white_pawn(board, dst, flag);
     break;
   case BLACK_PAWN:
-    _unmake_black_pawn(board, dst, flag);
+    unmake_black_pawn(board, dst, flag);
     break;
   case WHITE_KING:
-    _unmake_white_king(board, src, dst, flag);
+    unmake_white_king(board, src, dst, flag);
     break;
   case BLACK_KING:
-    _unmake_black_king(board, src, dst, flag);
+    unmake_black_king(board, src, dst, flag);
     break;
   default:
     trap();
