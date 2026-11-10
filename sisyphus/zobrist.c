@@ -30,7 +30,7 @@ bb gen_curr_state_zobrist(ChessBoard *board) {
     int sq;
 
     while (bbit) {
-      POP_LSB(sq, bbit);
+      pop_lsb(sq, bbit);
       hash ^= HASH_PIECES[pc][sq];
     }
   }
@@ -54,7 +54,7 @@ bb gen_pawn_zobrist(ChessBoard *board) {
     bb bbit = board->bb_squares[pc];
     int sq;
     while (bbit) {
-      POP_LSB(sq, bbit);
+      pop_lsb(sq, bbit);
       hash ^= HASH_PIECES[pc][sq];
     }
   }

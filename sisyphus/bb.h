@@ -9,15 +9,15 @@
 #define BB_DARK_SQUARES U64(0xaa55aa55aa55aa55)
 #define BIT(sq) (U64(1) << (sq))
 
-#define POP_LSB(b, x)                                                          \
+#define pop_lsb(b, x)                                                          \
   b = lsb(x);                                                                  \
   x &= ~BIT(b);
-#define POP_MSB(b, x)                                                          \
+#define pop_msb(b, x)                                                          \
   b = msb(x);                                                                  \
   x &= ~BIT(b);
 
-#define SET_BIT(bbit, sq) ((bbit) |= BIT(sq))
-#define CLEAR_BIT(bbit, sq) ((bbit) &= ~BIT(sq))
+#define set_bit(bbit, sq) ((bbit) |= BIT(sq))
+#define clear_bit(bbit, sq) ((bbit) &= ~BIT(sq))
 
 #define lsb(x) get_lsb(x)
 #define msb(x) get_msb(x)

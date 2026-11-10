@@ -102,7 +102,7 @@ int bb_squares(bb value, int squares[64]) {
   int i = 0;
   int sq;
   while (value) {
-    POP_LSB(sq, value);
+    pop_lsb(sq, value);
     squares[i++] = sq;
   }
   return i;

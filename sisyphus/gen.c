@@ -31,10 +31,10 @@ INLINE int gen_knight_moves(Move *moves, bb srcs, bb mask, enum Color color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
-    POP_LSB(src, srcs);
+    pop_lsb(src, srcs);
     bb dsts = BB_KNIGHT[src] & mask;
     while (dsts) {
-      POP_LSB(dst, dsts);
+      pop_lsb(dst, dsts);
       emit_move_with_color(&moves, src, dst, KNIGHT, color);
     }
   }
@@ -45,10 +45,10 @@ INLINE int gen_bishop_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
-    POP_LSB(src, srcs);
+    pop_lsb(src, srcs);
     bb dsts = bb_bishop(src, all) & mask;
     while (dsts) {
-      POP_LSB(dst, dsts);
+      pop_lsb(dst, dsts);
       emit_move_with_color(&moves, src, dst, BISHOP, color);
     }
   }
@@ -59,10 +59,10 @@ INLINE int gen_rook_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
-    POP_LSB(src, srcs);
+    pop_lsb(src, srcs);
     bb dsts = bb_rook(src, all) & mask;
     while (dsts) {
-      POP_LSB(dst, dsts);
+      pop_lsb(dst, dsts);
       emit_move_with_color(&moves, src, dst, ROOK, color);
     }
   }
@@ -73,10 +73,10 @@ INLINE int gen_queen_moves(Move *moves, bb srcs, bb mask, bb all, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
-    POP_LSB(src, srcs);
+    pop_lsb(src, srcs);
     bb dsts = bb_queen(src, all) & mask;
     while (dsts) {
-      POP_LSB(dst, dsts);
+      pop_lsb(dst, dsts);
       emit_move_with_color(&moves, src, dst, QUEEN, color);
     }
   }
@@ -87,10 +87,10 @@ INLINE int gen_king_moves(Move *moves, bb srcs, bb mask, int color) {
   Move *ptr = moves;
   int src, dst;
   while (srcs) {
-    POP_LSB(src, srcs);
+    pop_lsb(src, srcs);
     bb dsts = BB_KING[src] & mask;
     while (dsts) {
-      POP_LSB(dst, dsts);
+      pop_lsb(dst, dsts);
       emit_move_with_color(&moves, src, dst, KING, color);
     }
   }
@@ -109,7 +109,7 @@ INLINE int gen_white_pawn_moves(ChessBoard *board, Move *moves) {
   int sq;
 
   while (p1) {
-    POP_LSB(sq, p1);
+    pop_lsb(sq, p1);
     if (test_bit(promo, sq)) {
       emit_promotions(&moves, sq - 8, sq, WHITE_PAWN);
     } else {
@@ -118,12 +118,12 @@ INLINE int gen_white_pawn_moves(ChessBoard *board, Move *moves) {
   }
 
   while (p2) {
-    POP_LSB(sq, p2);
+    pop_lsb(sq, p2);
     emit_move_with_empty_flag(&moves, sq - 16, sq, WHITE_PAWN);
   }
 
   while (a1) {
-    POP_LSB(sq, a1);
+    pop_lsb(sq, a1);
     if (test_bit(promo, sq)) {
       emit_promotions(&moves, sq - 7, sq, WHITE_PAWN);
     } else {
@@ -136,7 +136,7 @@ INLINE int gen_white_pawn_moves(ChessBoard *board, Move *moves) {
   }
 
   while (a2) {
-    POP_LSB(sq, a2);
+    pop_lsb(sq, a2);
     if (test_bit(promo, sq)) {
       emit_promotions(&moves, sq - 9, sq, WHITE_PAWN);
     } else {
@@ -223,12 +223,12 @@ INLINE int gen_white_pawn_attacks_against(ChessBoard *board, Move *moves,
   int sq;
 
   while (a1) {
-    POP_LSB(sq, a1);
+    pop_lsb(sq, a1);
     emit_move_with_empty_flag(&moves, sq - 7, sq, WHITE_PAWN);
   }
 
   while (a2) {
-    POP_LSB(sq, a2);
+    pop_lsb(sq, a2);
     emit_move_with_empty_flag(&moves, sq - 9, sq, WHITE_PAWN);
   }
   return moves - ptr;
@@ -291,7 +291,7 @@ INLINE int gen_black_pawn_moves(ChessBoard *board, Move *moves) {
   bb a2 = ((pawns & 0xfefefefefefefefeL) >> 9) & mask;
   int sq;
   while (p1) {
-    POP_LSB(sq, p1);
+    pop_lsb(sq, p1);
     if (test_bit(promo, sq)) {
       emit_promotions(&moves, sq + 8, sq, BLACK_PAWN);
     } else {
@@ -299,11 +299,11 @@ INLINE int gen_black_pawn_moves(ChessBoard *board, Move *moves) {
     }
   }
   while (p2) {
-    POP_LSB(sq, p2);
+    pop_lsb(sq, p2);
     emit_move_with_empty_flag(&moves, sq + 16, sq, BLACK_PAWN);
   }
   while (a1) {
-    POP_LSB(sq, a1);
+    pop_lsb(sq, a1);
     if (test_bit(promo, sq)) {
       emit_promotions(&moves, sq + 7, sq, BLACK_PAWN);
     } else {
@@ -315,7 +315,7 @@ INLINE int gen_black_pawn_moves(ChessBoard *board, Move *moves) {
     }
   }
   while (a2) {
-    POP_LSB(sq, a2);
+    pop_lsb(sq, a2);
     if (test_bit(promo, sq)) {
       emit_promotions(&moves, sq + 9, sq, BLACK_PAWN);
     } else {
@@ -402,12 +402,12 @@ INLINE int gen_black_pawn_attacks_against(ChessBoard *board, Move *moves,
   int sq;
 
   while (a1) {
-    POP_LSB(sq, a1);
+    pop_lsb(sq, a1);
     emit_move_with_empty_flag(&moves, sq + 7, sq, BLACK_PAWN);
   }
 
   while (a2) {
-    POP_LSB(sq, a2);
+    pop_lsb(sq, a2);
     emit_move_with_empty_flag(&moves, sq + 9, sq, BLACK_PAWN);
   }
   return moves - ptr;
