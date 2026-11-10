@@ -264,6 +264,8 @@ chess_lib.perft_test.argtypes = [POINTER(ChessBoard), c_int]
 chess_lib.perft_test.restype = c_uint64
 chess_lib.board_clear.argtypes = [POINTER(ChessBoard)]
 chess_lib.board_clear.restype = None
+chess_lib.board_copy.argtypes = [POINTER(ChessBoard), POINTER(ChessBoard)]
+chess_lib.board_copy.restype = None
 chess_lib.board_drawn_by_insufficient_material.argtypes = [POINTER(ChessBoard), c_int]
 chess_lib.board_drawn_by_insufficient_material.restype = c_bool
 
@@ -1078,9 +1080,10 @@ class BaseBoard:
         baseboard (ChessBoard): Internal C structure representing the board state
     """
 
-    def __init__(self) -> None:
-        self.baseboard: ChessBoard = ChessBoard()
-        self.board_init()
+    def __init__(self, default: bool = True) -> None:
+        self.baseboard = ChessBoard()
+        if default:
+            self.board_init()
 
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.occ(BOTH).mask:#021_x})"
@@ -1457,13 +1460,11 @@ class Board(BaseBoard):
         >>> board.pop()  # Take back the move
     """
 
-    def __init__(self, fen: str | None = None):
-        super().__init__()
-        if fen is None:
-            self.set_fen(STARTING_FEN)
-        else:
-            self.set_fen(fen)
-        self._handle_moves: MovesStack = MovesStack(self)
+    def __init__(self, fen: str | None = None, default: bool = True):
+        super().__init__(default=default)
+        if default:
+            self.set_fen(STARTING_FEN if fen is None else fen)
+            self._handle_moves: MovesStack = MovesStack(self)
         self._MoveBuf = create_uint32_array(MAX_MOVES)
 
     def clear(self) -> None:
@@ -1712,13 +1713,8 @@ class Board(BaseBoard):
         return self._handle_moves.peek()
 
     def copy(self) -> Self:
-        dst = type(self)(None)
-        pointer(dst.baseboard)[
-            0
-        ] = (
-            self.baseboard
-        )  # https://stackoverflow.com/questions/1470343/python-copying-structures-contents
-
+        dst = type(self)(default=False)
+        chess_lib.board_copy(dst.ptr, self.ptr)
         dst._handle_moves = self._handle_moves.copy(dst)
         return dst
 
