@@ -23,7 +23,6 @@ import statistics
 import sys
 import time
 import timeit
-from ctypes import pointer
 
 import chess
 import sisyphus
@@ -196,30 +195,53 @@ def bench_copy(repeat: int) -> None:
     report(f"copy x{n}", t_c, t_s)
     print(f"  per copy: chess={t_c / n * 1e6:.2f}us  sisyphus={t_s / n * 1e6:.2f}us")
 
-    # Breakdown of Sisyphus copy(): mirrors the steps inside Board.copy().
-    # Wrapped in try/except because it touches internal attribute names.
+    # Sanity: the copy must be an independent, equal position.
+    cp = sb.copy()
+    assert len(sis_moves(cp)) == len(sis_moves(sb)), "copy() changed the position"
+    if hasattr(sb, "fen"):
+        assert cp.fen == sb.fen, "copy() produced a different position"
+
+    # Breakdown of Sisyphus copy(): mirrors the steps in Board.copy()
+    #     dst = type(self)(default=False)
+    #     chess_lib.board_copy(dst.ptr, self.ptr)
+    #     dst._handle_moves = self._handle_moves.copy(dst)
+    # and splits Board.__init__ into its parts. Each step is skipped if the
+    # internal name it needs is not exported by the sisyphus package.
     print("  Sisyphus copy() breakdown (per call):")
-    try:
-        dst = type(sb)(None)
 
-        def construct():
-            type(sb)(None)
-
-        def struct_assign():
-            pointer(dst.baseboard)[0] = sb.baseboard
-
-        def history_copy():
-            sb._handle_moves.copy(dst)
-
-        for label, fn in (
-            ("construct Board(None)", construct),
-            ("struct assignment   ", struct_assign),
-            ("move-stack copy     ", history_copy),
-        ):
+    def step(label, fn):
+        try:
             total = timeit.timeit(fn, number=n)
-            print(f"    {label}: {total / n * 1e6:8.2f}us")
-    except Exception as exc:  # noqa: BLE001
-        print(f"    (breakdown skipped: {exc!r})")
+            print(f"    {label:<28}: {total / n * 1e6:8.2f}us")
+        except Exception as exc:  # noqa: BLE001
+            print(f"    {label:<28}: skipped ({exc!r})")
+
+    cls = type(sb)
+    dst = cls(default=False)
+
+    # Whole thing, then its pieces
+    step("full copy()", sb.copy)
+    step("construct Board(default=False)", lambda: cls(default=False))
+
+    # Parts of Board.__init__
+    base_cls = getattr(sisyphus, "BaseBoard", None)
+    if base_cls is not None:
+        step(
+            "  BaseBoard.__init__ only", lambda: base_cls.__init__(object.__new__(cls))
+        )
+    stack_cls = getattr(sisyphus, "MovesStack", None)
+    if stack_cls is not None:
+        step("  MovesStack(board)", lambda: stack_cls(sb))
+    make_buf = getattr(sisyphus, "create_uint32_array", None)
+    max_moves = getattr(sisyphus, "MAX_MOVES", None)
+    if make_buf is not None and max_moves is not None:
+        step("  create_uint32_array(MAX)", lambda: make_buf(max_moves))
+
+    # Parts of copy() after construction
+    lib = getattr(sisyphus, "chess_lib", None)
+    if lib is not None:
+        step("C board_copy (ctypes call)", lambda: lib.board_copy(dst.ptr, sb.ptr))
+    step("move-stack copy", lambda: sb._handle_moves.copy(dst))
 
 
 def bench_native_perft(repeat: int) -> None:
