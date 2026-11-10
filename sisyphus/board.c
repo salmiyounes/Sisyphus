@@ -1,9 +1,14 @@
 #define _POSIX_C_SOURCE 199309L
 
+#if defined(__x86_64__) || defined(_M_X64)
+#include "FastMemcpy.h"
+#endif
+
 #include "board.h"
 #include "move.h"
 #include "time.h"
 #include "utils.h"
+
 #include <ctype.h>
 #include <string.h>
 
@@ -67,14 +72,47 @@ void board_clear(ChessBoard *board) {
   board->eg[WHITE] = board->eg[BLACK] = 0;
 }
 
+void board_copy(ChessBoard *pos, const ChessBoard *pos0) {
+  pos->color = pos0->color;       // side to move
+  pos->numMoves = pos0->numMoves; // moves played
+  pos->castle = pos0->castle;     // castling rights
+
+  for (int sq = 0; sq < SQUARE_NB; sq++)
+    pos->squares[sq] = pos0->squares[sq]; // piece on each square
+
+  for (int c = WHITE; c < BOTH; c++) {
+    pos->mg[c] = pos0->mg[c]; // middlegame score
+    pos->eg[c] = pos0->eg[c]; // endgame score
+  }
+  pos->gamePhase = pos0->gamePhase; // game phase
+
+  for (int pc = WHITE_PAWN; pc < NONE; pc++)
+    pos->bb_squares[pc] = pos0->bb_squares[pc]; // piece bitboards
+
+  for (int c = WHITE; c <= BOTH; c++)
+    pos->occ[c] = pos0->occ[c]; // occupancy (white/black/both)
+
+#if defined(__x86_64__) || defined(_M_X64)
+  // https://skywind.me/blog/archives/1587
+  memcpy_fast(pos->m_history, pos0->m_history,
+              sizeof(bb) * pos->numMoves); // used history only
+#else
+  memcpy(pos->m_history, pos0->m_history, sizeof(bb) * pos->numMoves);
+#endif
+
+  pos->ep = pos0->ep;               // en passant square
+  pos->hash = pos0->hash;           // position hash
+  pos->pawn_hash = pos0->pawn_hash; // pawn hash (unused)
+}
+
 INLINE void board_remove_piece(ChessBoard *board, enum Square sq,
                                enum ColoredPiece prev) {
-  CLEAR_BIT(board->occ[BOTH], sq);
-  CLEAR_BIT(board->bb_squares[prev], sq);
+  clear_bit(board->occ[BOTH], sq);
+  clear_bit(board->bb_squares[prev], sq);
   if (piece_color(prev))
-    CLEAR_BIT(board->occ[BLACK], sq);
+    clear_bit(board->occ[BLACK], sq);
   else
-    CLEAR_BIT(board->occ[WHITE], sq);
+    clear_bit(board->occ[WHITE], sq);
 
   board->hash ^= HASH_PIECES[prev][sq];
   board->mg[piece_color(prev)] -= mg_table[prev][sq];
@@ -84,12 +122,12 @@ INLINE void board_remove_piece(ChessBoard *board, enum Square sq,
 
 INLINE void board_set_piece(ChessBoard *board, enum Square sq,
                             enum ColoredPiece piece) {
-  SET_BIT(board->occ[BOTH], sq);
-  SET_BIT(board->bb_squares[piece], sq);
+  set_bit(board->occ[BOTH], sq);
+  set_bit(board->bb_squares[piece], sq);
   if (piece_color(piece))
-    SET_BIT(board->occ[BLACK], sq);
+    set_bit(board->occ[BLACK], sq);
   else
-    SET_BIT(board->occ[WHITE], sq);
+    set_bit(board->occ[WHITE], sq);
 
   board->hash ^= HASH_PIECES[piece][sq];
   board->mg[piece_color(piece)] += mg_table[piece][sq];
@@ -306,7 +344,7 @@ void board_load_fen(ChessBoard *board, const char *fen) {
   if (token != NULL) {
     int sq = string_to_sq(token);
     if (sq != -1)
-      SET_BIT(board->ep, sq);
+      set_bit(board->ep, sq);
   }
 
 finish:

@@ -63,6 +63,8 @@ void board_load_fen(ChessBoard *board,
 void board_to_fen(ChessBoard *board, char *fen); // Convert position to FEN
 void board_update(ChessBoard *board, enum Square sq,
                   enum ColoredPiece piece); // Update board state
+void board_copy(ChessBoard *pos,
+                const ChessBoard *pos0); // Copy pos0 into pos
 
 // Game state evaluation
 bool board_drawn_by_insufficient_material(
