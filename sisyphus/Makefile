@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wextra -Wshadow -std=c11 -fPIC -O3
+CFLAGS = -Wall -Wextra -Wshadow -std=c11 -fPIC -O3 -msse2 
 LINK_FLAGS = -pthread
 
 DEBUG ?= 1
