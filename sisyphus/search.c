@@ -404,7 +404,7 @@ int best_move(Search *search, ChessBoard *board, Move *result, bool debug) {
     if (debug) {
       printf("info score=%d, depth=%d, pv ", best_score, depth);
       print_pv(search, board, depth);
-      printf("\n");
+      newline();
     }
 
     if (best_score == -INF) {

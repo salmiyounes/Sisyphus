@@ -28,6 +28,8 @@
 
 #endif
 
+#define newline() putc('\n', stdout)
+
 #define trap() __builtin_trap()
 
 // Assertion macro

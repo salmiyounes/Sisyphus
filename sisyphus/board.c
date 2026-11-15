@@ -105,34 +105,39 @@ void board_copy(ChessBoard *pos, const ChessBoard *pos0) {
   pos->pawn_hash = pos0->pawn_hash; // pawn hash (unused)
 }
 
-INLINE void board_remove_piece(ChessBoard *board, enum Square sq,
-                               enum ColoredPiece prev) {
-  clear_bit(board->occ[BOTH], sq);
-  clear_bit(board->bb_squares[prev], sq);
-  if (piece_color(prev))
-    clear_bit(board->occ[BLACK], sq);
-  else
-    clear_bit(board->occ[WHITE], sq);
+INLINE void board_update_piece(ChessBoard *board, enum Square sq,
+                               enum ColoredPiece piece, bool add) {
+  const int color = piece_color(piece);
 
-  board->hash ^= HASH_PIECES[prev][sq];
-  board->mg[piece_color(prev)] -= mg_table[prev][sq];
-  board->eg[piece_color(prev)] -= eg_table[prev][sq];
-  board->gamePhase -= gamephaseInc[prev];
+  if (add) {
+    set_bit(occ(board, BOTH), sq);
+    set_bit(board->bb_squares[piece], sq);
+    set_bit(occ(board, color), sq);
+
+    board->mg[color] += mg_table[piece][sq];
+    board->eg[color] += eg_table[piece][sq];
+    board->gamePhase += gamephaseInc[piece];
+  } else {
+    clear_bit(occ(board, BOTH), sq);
+    clear_bit(board->bb_squares[piece], sq);
+    clear_bit(occ(board, color), sq);
+
+    board->mg[color] -= mg_table[piece][sq];
+    board->eg[color] -= eg_table[piece][sq];
+    board->gamePhase -= gamephaseInc[piece];
+  }
+
+  board->hash ^= HASH_PIECES[piece][sq];
 }
 
 INLINE void board_set_piece(ChessBoard *board, enum Square sq,
                             enum ColoredPiece piece) {
-  set_bit(board->occ[BOTH], sq);
-  set_bit(board->bb_squares[piece], sq);
-  if (piece_color(piece))
-    set_bit(board->occ[BLACK], sq);
-  else
-    set_bit(board->occ[WHITE], sq);
+  board_update_piece(board, sq, piece, true);
+}
 
-  board->hash ^= HASH_PIECES[piece][sq];
-  board->mg[piece_color(piece)] += mg_table[piece][sq];
-  board->eg[piece_color(piece)] += eg_table[piece][sq];
-  board->gamePhase += gamephaseInc[piece];
+INLINE void board_remove_piece(ChessBoard *board, enum Square sq,
+                               enum ColoredPiece prev) {
+  board_update_piece(board, sq, prev, false);
 }
 
 INLINE void board_update(ChessBoard *board, enum Square sq,
@@ -161,6 +166,7 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   case NONE:
     break;
   default:
+    err("board_update: invalid piece stored on square");
     trap();
   }
 
@@ -182,6 +188,7 @@ INLINE void board_update(ChessBoard *board, enum Square sq,
   case NONE:
     break;
   default:
+    err("board_update: invalid piece argument");
     trap();
   }
 }
@@ -218,7 +225,7 @@ void print_board(ChessBoard *board) {
     for (int f = 0; f < FILE_NB; f++) {
       printf("%s", PIECE_SYMBOLS[board->squares[square(r, f)]]);
     }
-    printf("\n");
+    newline();
   }
 
   printf("  a b c d e f g h\n\n");

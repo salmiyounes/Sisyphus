@@ -39,7 +39,6 @@ from ctypes import (
     c_uint32,
     c_uint64,
     create_string_buffer,
-    pointer,
 )
 
 from typing import Any, cast
