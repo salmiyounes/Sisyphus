@@ -53,5 +53,6 @@ int is_check(ChessBoard *board);        // Check if king is in check
 int move_gives_check(ChessBoard *board,
                      const Move move); // Check if move gives check
 bool is_valid(ChessBoard *board);
+bool is_mate(const ChessBoard *board0);
 
 #endif // GEN_H

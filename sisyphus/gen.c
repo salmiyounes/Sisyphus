@@ -490,6 +490,22 @@ INLINE int illegal_to_move(ChessBoard *board) {
 
 INLINE int is_check(ChessBoard *board) { return bb_is_check(board); }
 
+bool is_mate(const ChessBoard *board0) {
+  if (!is_check(board0))
+    return false;
+
+  Move moves[MAX_MOVES];
+  int count = gen_moves(board0, moves);
+
+  for (int i = 0; i < count; i++) {
+    ChessBoard board1;
+    board_copy(&board1, board0);
+    if (make_move(&board1, moves[i]))
+      return false;
+  }
+  return true;
+}
+
 bool is_valid(ChessBoard *board) {
   if (popcount(kings(board)) != 2)
     return false;
