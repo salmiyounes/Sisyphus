@@ -293,6 +293,8 @@ chess_lib.is_check.argtypes = [POINTER(ChessBoard)]
 chess_lib.is_check.restype = c_int
 chess_lib.is_valid.argtypes = [POINTER(ChessBoard)]
 chess_lib.is_valid.restype = c_bool
+chess_lib.is_mate.argtypes = [POINTER(ChessBoard)]
+chess_lib.is_mate.restype = c_bool
 
 
 # Move Handling functions
@@ -1553,7 +1555,10 @@ class Board(BaseBoard):
         Returns:
             bool: True if the side to move is in checkmate
         """
-        return self.is_check() and not any(self.gen_legal_moves)
+        # NOTE: delegates to C for speed (single call, early exit on the first
+        # legal move). Reference definition, also useful as a test oracle:
+        # return self.is_check() and not any(self.gen_legal_moves)
+        return cast(bool, chess_lib.is_mate(self.ptr))
 
     def is_fifty_moves(self) -> bool:
         return False
