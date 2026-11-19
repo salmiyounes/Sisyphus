@@ -1,4 +1,5 @@
 import logging
+import random
 import sys
 import unittest
 import textwrap
@@ -238,6 +239,38 @@ class BoardTestCase(unittest.TestCase):
         self.assertFalse(board.is_checkmate())
         board.set_fen("rnbqkbnr/ppp2ppp/3p4/1B2Q3/8/8/PPPPPPPP/RN2KBNR b KQkq - 0 1")
         self.assertTrue(board.is_checkmate())
+
+    def test_checkmate_known_positions(self):
+        mates = [
+            # Fool's mate (white is mated)
+            "rnb1kbnr/pppp1ppp/8/4p3/6Pq/5P2/PPPPP2P/RNBQKBNR w KQkq - 1 3",
+            # Back-rank mate (black is mated)
+            "R5k1/5ppp/8/8/8/8/8/4K3 b - - 0 1",
+        ]
+        for fen in mates:
+            with self.subTest(fen=fen):
+                board = sisyphus.Board(fen)
+                self.assertTrue(board.is_checkmate())
+                self.assertFalse(board.is_stalemate())
+
+        # Stalemate is not checkmate: no legal moves, but not in check.
+        board = sisyphus.Board("7k/5Q2/6K1/8/8/8/8/8 b - - 0 1")
+        self.assertFalse(board.is_checkmate())
+        self.assertTrue(board.is_stalemate())
+
+    def test_checkmate_matches_definition(self):
+        # The C `is_mate` (fast path) must agree with the plain definition
+        # "in check and no legal moves" (the oracle) on random games.
+        rng = random.Random(0)  # fixed seed: reproducible failures
+        for _ in range(50):
+            board = sisyphus.Board()
+            for _ in range(100):
+                moves = list(board.generate_legal_moves())
+                expected = board.is_check() and not moves
+                self.assertEqual(board.is_checkmate(), expected, board.fen)
+                if not moves:
+                    break
+                board.push(rng.choice(moves))
 
     def test_insufficient_material(self):
         def _check(board: sisyphus.Board, white: bool, black: bool):
