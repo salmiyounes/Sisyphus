@@ -50,8 +50,8 @@ int gen_moves(ChessBoard *board, Move *moves); // Generate all possible moves
 // Move validation and check detection
 int illegal_to_move(ChessBoard *board); // Check if position is illegal
 int is_check(ChessBoard *board);        // Check if king is in check
-int move_gives_check(ChessBoard *board,
-                     const Move move); // Check if move gives check
+bool move_gives_check(const ChessBoard *board0,
+                      const Move move); // Check if move gives check
 bool is_valid(ChessBoard *board);
 bool is_mate(const ChessBoard *board0);
 

@@ -554,12 +554,11 @@ bool is_valid(ChessBoard *board) {
   return !illegal_to_move(board);
 }
 
-int move_gives_check(ChessBoard *board, const Move move) {
-  Undo undo;
+bool move_gives_check(const ChessBoard *board0, const Move move) {
+  ChessBoard board1;
+  board_copy(&board1, board0);
 
-  do_move(board, move, &undo);
-  int flag = is_check(board);
-  undo_move(board, move, &undo);
-
-  return flag;
+  if (!make_move(&board1, move))
+    return false; /* illegal move: it gives no check */
+  return is_check(&board1);
 }
