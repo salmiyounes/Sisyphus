@@ -30,12 +30,6 @@
 #define IS_CAS(flag) ((flag) == CASTLE_FLAG)   // Check if castling
 
 // Board update macros
-#define TOGGLE_HASH(board)                                                     \
-  if (board->castle)                                                           \
-    board->hash ^= HASH_CASTLE[board->castle];                                 \
-  if (board->ep)                                                               \
-    board->hash ^= HASH_EP[file_of(lsb(board->ep))];
-
 #define place_promo_piece(board, dst, flag, color)                             \
   board_update((board), (dst), make_piece_type(PROMO_PT(flag), (color)))
 
@@ -85,6 +79,14 @@ static INLINE bool is_capture(ChessBoard *board, const Move move) {
 
 static INLINE bool is_tactical_move(ChessBoard *board, const Move move) {
   return is_capture(board, move) || IS_PROMO(extract_flags(move));
+}
+
+static INLINE void toggle_hash(ChessBoard *board) {
+  if (board->castle)
+    board->hash ^= HASH_CASTLE[board->castle];
+
+  if (board->ep)
+    board->hash ^= HASH_EP[file_of(lsb(board->ep))];
 }
 
 // Move scoring tables

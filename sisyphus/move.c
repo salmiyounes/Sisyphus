@@ -157,7 +157,7 @@ void do_move(ChessBoard *board, Move move, Undo *undo) {
 
   board->m_history[board->numMoves++] = board->hash;
 
-  TOGGLE_HASH(board);
+  toggle_hash(board);
 
   undo->capture = board->squares[dst];
   undo->ep = board->ep;
@@ -204,7 +204,7 @@ void do_move(ChessBoard *board, Move move, Undo *undo) {
 
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
-  TOGGLE_HASH(board);
+  toggle_hash(board);
 }
 
 void undo_move(ChessBoard *board, Move move, Undo *undo) {
@@ -217,7 +217,7 @@ void undo_move(ChessBoard *board, Move move, Undo *undo) {
   ASSERT(piece >= WHITE_PAWN && piece <= NONE);
   ASSERT(flag >= EMPTY_FLAG && flag <= QUEEN_PROMO_FLAG);
 
-  TOGGLE_HASH(board);
+  toggle_hash(board);
 
   int capture = undo->capture;
 
@@ -256,26 +256,26 @@ void undo_move(ChessBoard *board, Move move, Undo *undo) {
 
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
-  TOGGLE_HASH(board);
+  toggle_hash(board);
   board->numMoves--;
 }
 
 void do_null_move_pruning(ChessBoard *board, Undo *undo) {
   board->m_history[board->numMoves++] = board->hash;
-  TOGGLE_HASH(board);
+  toggle_hash(board);
   undo->ep = board->ep;
   board->ep = EMPTY_BB;
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
-  TOGGLE_HASH(board);
+  toggle_hash(board);
 }
 
 void undo_null_move_pruning(ChessBoard *board, Undo *undo) {
-  TOGGLE_HASH(board);
+  toggle_hash(board);
   board->ep = undo->ep;
   SWITCH_SIDE(board);
   board->hash ^= HASH_COLOR_SIDE;
-  TOGGLE_HASH(board);
+  toggle_hash(board);
   board->numMoves--;
 }
 

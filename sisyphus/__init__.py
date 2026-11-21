@@ -44,7 +44,7 @@ from ctypes import (
 from typing import Any, cast
 
 if typing.TYPE_CHECKING:
-    from typing_extensions import Self, TypeAlias
+    from typing import Self, TypeAlias
 
 # Starting position fen
 STARTING_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq -"
@@ -1577,6 +1577,15 @@ class Board(BaseBoard):
     def is_legal(self, move: Move) -> bool:
         dummy = self.copy()
         return cast(bool, chess_lib.make_move(dummy.ptr, hash(move)))
+
+    def is_capture(self, move: Move) -> bool:
+        them = self.occ(not self.turn)
+        return test_bit(them.mask, move.dst_sq) or self.is_en_passant(
+            move
+        )
+
+    def is_en_passant(self, move: Move) -> bool:
+        return cast(bool, chess_lib.is_en_passant(self.ptr, hash(move)))
 
     def checkers(self, color: Color) -> SquareSet:
         """Get pieces giving check to a king.
