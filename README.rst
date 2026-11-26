@@ -10,6 +10,10 @@ Sisyphus
    :alt: https://github.com/salmiyounes/Sisyphus/actions/
    :target: Typing
 
+.. image:: https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/astral-sh/ruff/main/assets/badge/v2.json
+   :target: https://github.com/astral-sh/ruff
+   :alt: Ruff
+
 .. image:: https://img.shields.io/github/license/salmiyounes/Sisyphus
    :alt: License: MIT
    :target: https://github.com/salmiyounes/Sisyphus/blob/master/LICENSE
