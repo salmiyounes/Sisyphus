@@ -40,7 +40,6 @@ from ctypes import (
     c_uint64,
     create_string_buffer,
 )
-
 from typing import Any, cast
 
 if typing.TYPE_CHECKING:
@@ -1343,6 +1342,7 @@ class BaseBoard:
 
     def _set_fen(self, fen: str) -> None:
         backup = self.board_to_fen()
+        self._validate_board_fen(fen)
         chess_lib.board_load_fen(self.ptr, fen.encode())
         if not chess_lib.is_valid(self.ptr):
             self._restore(backup)
@@ -1580,9 +1580,7 @@ class Board(BaseBoard):
 
     def is_capture(self, move: Move) -> bool:
         them = self.occ(not self.turn)
-        return test_bit(them.mask, move.dst_sq) or self.is_en_passant(
-            move
-        )
+        return test_bit(them.mask, move.dst_sq) or self.is_en_passant(move)
 
     def is_en_passant(self, move: Move) -> bool:
         return cast(bool, chess_lib.is_en_passant(self.ptr, hash(move)))

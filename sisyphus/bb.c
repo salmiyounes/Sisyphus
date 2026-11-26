@@ -141,21 +141,7 @@ INLINE bb bb_get_king_attacks(enum Square sq) {
 
 INLINE int bb_attacks_to_king_square(ChessBoard *board, const bb b_king) {
   assert(b_king);
-  int king_sq = lsb(b_king);
-  return is_square_attacked_by(board, king_sq, board->color);
-}
-
-INLINE bool bb_is_check(ChessBoard *board) {
-  bb them = other(board, board->color);
-  int sq = lsb(board->bb_squares[board->color ? BLACK_KING : WHITE_KING]);
-  bb occupied = occ(board, BOTH);
-
-  return (bb_get_rook_attacks(sq, occupied) & (rooks(board) | queens(board)) &
-          them) ||
-         (bb_get_bishop_attacks(sq, occupied) &
-          (bishops(board) | queens(board)) & them) ||
-         (bb_get_knight_attacks(sq) & knights(board) & them) ||
-         (bb_get_pawns_attacks(sq, board->color) & pawns(board) & them);
+  return is_square_attacked_by(board, lsb(b_king), board->color);
 }
 
 INLINE bb bb_attacks_to_square(ChessBoard *board, enum Square sq, bb occupied) {

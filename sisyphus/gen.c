@@ -1,31 +1,38 @@
 #include "gen.h"
 
-// Helper Macros
-#define emit_move_with_empty_flag(moves, from, to, piece)                      \
-  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
-            (enum ColoredPiece)(piece), EMPTY_FLAG)
+// Helper functions
 
-#define emit_move_with_color(moves, from, to, piece, color)                    \
-  emit_move_with_empty_flag(                                                   \
-      (moves), (from), (to),                                                   \
-      make_piece_type((enum PieceType)(piece), (enum Color)(color)))
+INLINE void emit_move_with_empty_flag(Move **moves, enum Square from,
+                                      enum Square to, enum ColoredPiece piece) {
+  emit_move(moves, from, to, piece, EMPTY_FLAG);
+}
 
-#define emit_promotion(moves, from, to, piece, flag)                           \
-  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
-            (enum ColoredPiece)(piece), (int)(flag))
+INLINE void emit_move_with_color(Move **moves, enum Square from, enum Square to,
+                                 enum PieceType piece, enum Color color) {
+  emit_move_with_empty_flag(moves, from, to, make_piece_type(piece, color));
+}
 
-#define emit_promotions(moves, from, to, piece)                                \
-  for (int flag = KNIGHT_PROMO_FLAG; flag <= QUEEN_PROMO_FLAG;                 \
-       emit_promotion((moves), (from), (to), (piece), flag), flag++) {         \
+INLINE void emit_promotion(Move **moves, enum Square from, enum Square to,
+                           enum ColoredPiece piece, int flag) {
+  emit_move(moves, from, to, piece, flag);
+}
+
+INLINE void emit_promotions(Move **moves, enum Square from, enum Square to,
+                            enum ColoredPiece piece) {
+  for (int flag = KNIGHT_PROMO_FLAG; flag <= QUEEN_PROMO_FLAG; flag++) {
+    emit_promotion(moves, from, to, piece, flag);
   }
+}
 
-#define emit_en_passant(moves, from, to, piece)                                \
-  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
-            (enum ColoredPiece)(piece), ENP_FLAG)
+INLINE void emit_en_passant(Move **moves, enum Square from, enum Square to,
+                            enum ColoredPiece piece) {
+  emit_move(moves, from, to, piece, ENP_FLAG);
+}
 
-#define emit_castle(moves, from, to, piece)                                    \
-  emit_move((Move **)(moves), (enum Square)(from), (enum Square)(to),          \
-            (enum ColoredPiece)(piece), CASTLE_FLAG)
+INLINE void emit_castle(Move **moves, enum Square from, enum Square to,
+                        enum ColoredPiece piece) {
+  emit_move(moves, from, to, piece, CASTLE_FLAG);
+}
 
 INLINE int gen_knight_moves(Move *moves, bb srcs, bb mask, enum Color color) {
   Move *ptr = moves;
@@ -484,11 +491,28 @@ INLINE int gen_legal_moves(ChessBoard *board, Move *moves) {
 }
 
 INLINE int illegal_to_move(ChessBoard *board) {
-  bb bb_king = board->bb_squares[board->color ? WHITE_KING : BLACK_KING];
-  return bb_attacks_to_king_square(board, bb_king);
+  return bb_attacks_to_king_square(board, kings(board) & them(board));
 }
 
-INLINE int is_check(ChessBoard *board) { return bb_is_check(board); }
+INLINE int is_check(ChessBoard *board) {
+  bb occ = occ(board, BOTH);
+  bb us = us(board), them = them(board);
+  bb king = kings(board) & us;
+  unsigned sq = lsb(king);
+  bb ratt = bb_get_rook_attacks(sq, occ);
+  bb batt = bb_get_bishop_attacks(sq, occ);
+  if (ratt & (rooks(board) & them))
+    return true;
+  if (batt & (bishops(board) & them))
+    return true;
+  if ((ratt | batt) & (queens(board) & them))
+    return true;
+  if (bb_get_knight_attacks(sq) & (knights(board) & them))
+    return true;
+  if (bb_pawns_attacks(sq, board->color) & (pawns(board) & them))
+    return true;
+  return false;
+}
 
 bool is_mate(const ChessBoard *board0) {
   if (!is_check(board0))
@@ -561,4 +585,13 @@ bool move_gives_check(const ChessBoard *board0, const Move move) {
   if (!make_move(&board1, move))
     return false; /* illegal move: it gives no check */
   return is_check(&board1);
+}
+
+bool move_gives_checkmate(const ChessBoard *board0, const Move move) {
+  ChessBoard board1;
+  board_copy(&board1, board0);
+
+  if (!make_move(&board1, move))
+    return false; /* illegal move: it gives no check */
+  return is_mate(&board1);
 }

@@ -153,8 +153,6 @@ bb bb_get_rook_attacks(enum Square sq, bb obs);
 
 int bb_attacks_to_king_square(ChessBoard *board, bb b_king);
 
-bool bb_is_check(ChessBoard *board);
-
 bool is_square_attacked_by(ChessBoard *board, enum Square square,
                            enum Color color);
 
