@@ -172,20 +172,55 @@ class ChessBoard(Structure):
     """A C structure that represents a chess position using bitboards for piece placement, game state, and move history."""
 
     _fields_ = [
-        ("squares", c_int * SQUARE_NB),
+        ("_squares", c_int * SQUARE_NB),
         ("numMoves", c_int),
-        ("color", c_int),
-        ("castle", c_int),
+        ("_color", c_int),
+        ("_castle", c_int),
         ("mg", c_int * 2),
         ("eg", c_int * 2),
         ("gamePhase", c_int),
-        ("bb_squares", c_uint64 * 12),
+        ("_bb_squares", c_uint64 * 12),
         ("m_history", c_uint64 * 8192),
-        ("occ", c_uint64 * 3),
+        ("_occ", c_uint64 * 3),
         ("ep", c_uint64),
-        ("hash", c_uint64),
+        ("_hash", c_uint64),
         ("pawn_hash", c_uint64),
     ]
+
+    # NOTE: Idea taken from the capstone bindings:
+    # https://github.com/capstone-engine/capstone/blob/next/bindings/python/capstone
+
+    def occ(self, color: object) -> BitBoard:
+        if not isinstance(color, Color) or color < WHITE or color > BOTH:
+            raise ValueError(
+                f"Invalid color value: {color}. Must be WHITE (0), BLACK (1) or BOTH (2)"
+            )
+        return cast(BitBoard, self._occ[color])
+
+    def squares(self, square: Square) -> int:
+        if not square in range(SQUARE_NB):
+            raise IndexError
+        return cast(int, self._squares[square])
+
+    def bb_squares(self, piece: Piece, color: object) -> BitBoard:
+        if not isinstance(color, Color) or color < WHITE or color > BLACK:
+            raise ValueError(
+                f"Invalid color value: {color}. Must be WHITE (0), BLACK (1)"
+            )
+        piece_type = PieceType(piece, BLACK if color else WHITE)
+        return cast(BitBoard, self._bb_squares[hash(piece_type)])
+
+    @property
+    def castle(self) -> int:
+        return cast(int, self._castle)
+
+    @property
+    def color(self) -> Color:
+        return cast(Color, self._color)
+
+    @property
+    def hash(self) -> BitBoard:
+        return cast(BitBoard, self._hash)
 
 
 class Entry(Structure):
@@ -743,14 +778,14 @@ class Move:
             if not result:
                 return ""
             return result.decode("utf-8")
-        except Exception as e:
+        except UnicodeDecodeError as e:
             print(f"Error converting move to string: {e}")
             return ""
 
     @classmethod
     def parse_uci(cls, board: Board, uci: object) -> Move:
         if not isinstance(uci, str):
-            raise ValueError("UCI must be a string")
+            raise TypeError("UCI must be a string")
         if len(uci) not in (4, 5):
             raise ValueError(f"Expected UCI string of length 4 or 5: {uci!r}")
 
@@ -1151,7 +1186,7 @@ class BaseBoard:
         Returns:
             BitBoard: 64-bit Zobrist hash value
         """
-        return cast(BitBoard, self.baseboard.hash)
+        return self.baseboard.hash
 
     def occ(self, color: object) -> SquareSet:
         """Get a bitboard of all pieces of a given color.
@@ -1165,21 +1200,10 @@ class BaseBoard:
         Raises:
             ValueError: If color is not WHITE, BLACK, or BOTH
         """
-        if not isinstance(color, Color) or color < WHITE or color > BOTH:
-            raise ValueError(
-                f"Invalid color value: {color}. Must be WHITE (0), BLACK (1) or BOTH (2)"
-            )
-        mask = cast(BitBoard, self.baseboard.occ[color])
-        return SquareSet(mask)
+        return SquareSet(self.baseboard.occ(color))
 
     def _get_piece_squares(self, piece: Piece, color: object) -> SquareSet:
-        if not isinstance(color, Color) or color < WHITE or color > BLACK:
-            raise ValueError(
-                f"Invalid color value: {color}. Must be WHITE (0), BLACK (1)"
-            )
-        piece_type = PieceType(piece, BLACK if color else WHITE)
-        mask = cast(BitBoard, self.baseboard.bb_squares[hash(piece_type)])
-        return SquareSet(mask)
+        return SquareSet(self.baseboard.bb_squares(piece, color))
 
     def pawns(self, color: Color) -> SquareSet:
         return self._get_piece_squares(PAWN, color)
@@ -1221,7 +1245,7 @@ class BaseBoard:
         """
         if not square in range(SQUARE_NB):
             raise IndexError
-        piece = cast(int, self.baseboard.squares[square])
+        piece = self.baseboard.squares(square)
         return PieceType.from_index(piece)
 
     def color_at(self, square: Square) -> Color | None:
@@ -1262,7 +1286,7 @@ class BaseBoard:
         return SquareSet(mask) & self.occ(color)
 
     def castling_rights(self) -> int:
-        return cast(int, self.baseboard.castle)
+        return self.baseboard.castle
 
     def clear(self) -> None:
         chess_lib.board_clear(self.ptr)
@@ -1367,7 +1391,7 @@ class BaseBoard:
     @property
     def turn(self) -> Color:
         """Get the turn color '0' for WHITE, '1' for BLACK"""
-        return cast(Color, self.baseboard.color)
+        return self.baseboard.color
 
     @property
     def ptr(self) -> object:
@@ -1375,8 +1399,11 @@ class BaseBoard:
 
 
 class MoveUndo:
-    def __init__(self, move: Move = Move.null()):
-        self._move = move
+    def __init__(self, move: Move | None = None):
+        if not move:
+            self._move = Move.null()
+        else:
+            self._move = move
         self.undo = Undo()
 
     @property
