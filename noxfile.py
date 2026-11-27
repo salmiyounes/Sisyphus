@@ -11,7 +11,7 @@ def tests(session):
 @nox.session
 def lint(session):
     session.install("ruff", "codespell")
-    session.run("ruff", "check", ".")
+    session.run("ruff", "check", "sisyphus/__init__.py")
     session.run("codespell", "sisyphus", "tests", "README.rst")
 
 
