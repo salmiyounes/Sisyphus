@@ -249,7 +249,15 @@ class Search(Structure):
 class Undo(Structure):
     """A C structure that stores information needed to undo a chess move, including captured pieces, castling rights, and en passant state."""
 
-    _fields_ = [("capture", c_int), ("castle", c_int), ("ep", c_uint64)]
+    _fields_ = [("_capture", c_int), ("castle", c_int), ("_ep", c_uint64)]
+
+    @property
+    def capture(self) -> int:
+        return cast(int, self._capture)
+
+    @property
+    def ep(self) -> Square:
+        return get_lsb(self._ep)
 
 
 try:
@@ -1426,8 +1434,7 @@ class MoveUndo:
         Returns:
             Optional[PieceType]: The captured piece type and color, or None if no capture
         """
-        capture = cast(int, self.undo.capture)
-        return PieceType.from_index(capture)
+        return PieceType.from_index(self.undo.capture)
 
     @property
     def enp_square(self) -> Square | None:
@@ -1438,7 +1445,7 @@ class MoveUndo:
                             or None if not an en passant capture
         """
         if self._move and self._move.is_enp():
-            return get_lsb(self.undo.ep)
+            return self.undo.ep
         return None
 
     @property
