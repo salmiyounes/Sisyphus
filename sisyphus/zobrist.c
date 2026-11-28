@@ -1,4 +1,5 @@
 #include "zobrist.h"
+#include "board.h"
 #include "utils.h"
 
 bb HASH_PIECES[12][64];
@@ -42,7 +43,7 @@ bb gen_curr_state_zobrist(ChessBoard *board) {
   hash ^= HASH_CASTLE[board->castle];
 
   if (board->ep) {
-    hash ^= HASH_EP[lsb(board->ep) % 8];
+    hash ^= HASH_EP[enp_square(board) % 8];
   }
 
   return hash;
@@ -60,7 +61,7 @@ bb gen_pawn_zobrist(ChessBoard *board) {
   }
 
   if (board->ep) {
-    hash ^= HASH_EP[lsb(board->ep) % 8];
+    hash ^= HASH_EP[enp_square(board) % 8];
   }
 
   if (board->color) {

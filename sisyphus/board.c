@@ -395,7 +395,7 @@ void board_to_fen(ChessBoard *board, char *fen) {
   } else
     *fen++ = '-';
 
-  sq = !!board->ep ? lsb(board->ep) : -1;
+  sq = !!board->ep ? enp_square(board) : -1;
   sq_to_string(sq, str);
 
   snprintf(fen, 4, " %s", str);

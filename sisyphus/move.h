@@ -66,7 +66,7 @@ INLINE bool is_en_passant(ChessBoard *board, const Move move) {
   bb us = us(board);
   if (board->ep == EMPTY_BB)
     return false;
-  if (to != (enum Square)lsb(board->ep))
+  if (to != enp_square(board))
     return false;
   if ((BIT(from) & us & pawns) == 0)
     return false;
@@ -86,7 +86,7 @@ static INLINE void toggle_hash(ChessBoard *board) {
     board->hash ^= HASH_CASTLE[board->castle];
 
   if (board->ep)
-    board->hash ^= HASH_EP[file_of(lsb(board->ep))];
+    board->hash ^= HASH_EP[file_of(enp_square(board))];
 }
 
 // Move scoring tables

@@ -1,6 +1,7 @@
 #ifndef BOARD_H
 #define BOARD_H
 
+#include "bb.h"
 #include "types.h"
 #include <stdbool.h>
 
@@ -53,6 +54,10 @@ static INLINE void update_castling_rights(ChessBoard *board, enum Square src,
                                           enum Square dst) {
   if (board->castle)
     board->castle &= ~(castling_rights[src] | castling_rights[dst]);
+}
+
+static INLINE enum Square enp_square(const ChessBoard *board) {
+  return (enum Square)(lsb(board->ep));
 }
 
 // Board manipulation functions
